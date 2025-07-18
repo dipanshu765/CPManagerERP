@@ -138,6 +138,8 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                           onClick={() => {
                             if (subItem.path === '/reports/inward') {
                               setLocation('/reports/inward');
+                            } else if (subItem.path === '/reports/stock-journal') {
+                              setLocation('/reports/stock-journal');
                             } else {
                               console.log(`Navigate to ${subItem.path}`);
                             }

@@ -1,0 +1,114 @@
+{
+    "status": 200,
+    "data": {
+        "transaction_id": "TR000001",
+        "voucher_type_name": "Sj Consumption [R]",
+        "voucher_number": "SHI001",
+        "remarks": "",
+        "date": "2025-07-18",
+        "effective_date": "2025-07-18",
+        "destination_godown": "Godown No 1",
+        "inventory_entries_in": [
+            {
+                "stock_item": "Process Gramdall Loose Rayapur [15.1.24]",
+                "actual_qty": {
+                    "primary_qty": 250.0,
+                    "primary_unit": "bags",
+                    "secondary_qty": 250.0,
+                    "secondary_unit": "qtl",
+                    "full_text": "250.00 bags = 250.00 qtl"
+                },
+                "batch_allocations": [
+                    {
+                        "batch_name": "Primary",
+                        "godown": "Godown No 1",
+                        "destination_godown": "Godown No 1",
+                        "actual_qty": {
+                            "primary_qty": 250.0,
+                            "primary_unit": "bags",
+                            "secondary_qty": 250.0,
+                            "secondary_unit": "qtl",
+                            "full_text": "250 bags =  250.0 qtl"
+                        }
+                    }
+                ]
+            },
+            {
+                "stock_item": "Bardan Reject",
+                "actual_qty": {
+                    "primary_qty": 500.0,
+                    "primary_unit": "pkt",
+                    "secondary_qty": 0.0,
+                    "secondary_unit": "",
+                    "full_text": "500.00 pkt"
+                },
+                "batch_allocations": [
+                    {
+                        "batch_name": "Primary",
+                        "godown": "A Main Location",
+                        "destination_godown": "A Main Location",
+                        "actual_qty": {
+                            "primary_qty": 500.0,
+                            "primary_unit": "pkt",
+                            "secondary_qty": 0.0,
+                            "secondary_unit": "",
+                            "full_text": "500 pkt"
+                        }
+                    }
+                ]
+            }
+        ],
+        "inventory_entries_out": [
+            {
+                "stock_item": "Raw Turdal Patka [Wb Gold ] New [50kg]",
+                "actual_qty": {
+                    "primary_qty": 370.0,
+                    "primary_unit": "pkt",
+                    "secondary_qty": 185.0,
+                    "secondary_unit": "qtl",
+                    "full_text": "370.00 pkt = 185.00 qtl"
+                },
+                "batch_allocations": [
+                    {
+                        "batch_name": "0640/500/KAUSHAL/24.3",
+                        "godown": "Godown No 2",
+                        "destination_godown": "Godown No 2",
+                        "actual_qty": {
+                            "primary_qty": 200.0,
+                            "primary_unit": "pkt",
+                            "secondary_qty": 100.0,
+                            "secondary_unit": "qtl",
+                            "full_text": "200 pkt =  100.0 qtl"
+                        }
+                    },
+                    {
+                        "batch_name": "5004/170/BABA/19.3.25",
+                        "godown": "Godown No 2",
+                        "destination_godown": "Godown No 2",
+                        "actual_qty": {
+                            "primary_qty": 70.0,
+                            "primary_unit": "pkt",
+                            "secondary_qty": 35.0,
+                            "secondary_unit": "qtl",
+                            "full_text": "70 pkt =  35.0 qtl"
+                        }
+                    },
+                    {
+                        "batch_name": "5057/500/KAUSHAL/2.4.25",
+                        "godown": "Godown No 2",
+                        "destination_godown": "Godown No 2",
+                        "actual_qty": {
+                            "primary_qty": 100.0,
+                            "primary_unit": "pkt",
+                            "secondary_qty": 50.0,
+                            "secondary_unit": "qtl",
+                            "full_text": "100 pkt =  50.0 qtl"
+                        }
+                    }
+                ]
+            }
+        ],
+        "created_at": "2025-07-18 10:49:45",
+        "updated_at": "2025-07-18 10:49:46"
+    }
+}

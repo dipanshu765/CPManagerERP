@@ -9,6 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import ImportData from "@/pages/import-data.jsx";
 import UserList from "@/pages/user-list.jsx";
 import InwardReports from "@/pages/inward-reports.jsx";
+import StockJournal from "@/pages/stock-journal.jsx";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/import" component={ImportData} />
       <Route path="/users" component={UserList} />
       <Route path="/reports/inward" component={InwardReports} />
+      <Route path="/reports/stock-journal" component={StockJournal} />
       <Route component={NotFound} />
     </Switch>
   );

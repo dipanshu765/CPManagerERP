@@ -32,7 +32,7 @@ const iconMap = {
 
 const reportSubMenus = [
   { name: "Inward Reports", icon: FileText, path: "/reports/inward" },
-  { name: "Stock Journals", icon: BarChart3, path: "/reports/stock" },
+  { name: "Stock Journals", icon: BarChart3, path: "/reports/stock-journal" },
   { name: "Machine Performance", icon: Activity, path: "/reports/machine" },
   { name: "Hamali Report", icon: TrendingUp, path: "/reports/hamali" },
   { name: "Attendance Report", icon: Clock, path: "/reports/attendance" },
@@ -113,6 +113,8 @@ export default function Sidebar() {
                         onClick={() => {
                           if (subItem.path === '/reports/inward') {
                             setLocation('/reports/inward');
+                          } else if (subItem.path === '/reports/stock-journal') {
+                            setLocation('/reports/stock-journal');
                           } else {
                             console.log(`Navigate to ${subItem.path}`);
                           }
