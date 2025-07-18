@@ -109,8 +109,11 @@ export default function Sidebar() {
                       <button
                         key={subIndex}
                         onClick={() => {
-                          console.log(`Navigate to ${subItem.path}`);
-                          // For now, just log the navigation
+                          if (subItem.path === '/reports/inward') {
+                            setLocation('/reports/inward');
+                          } else {
+                            console.log(`Navigate to ${subItem.path}`);
+                          }
                         }}
                         className={cn(
                           "w-full flex items-center px-6 py-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-all text-left text-sm",

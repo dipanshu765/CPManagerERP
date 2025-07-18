@@ -15,9 +15,9 @@ export default function TransactionChart({ data }: TransactionChartProps) {
       if (!canvasRef.current) return;
 
       // Dynamic import of Chart.js
-      const { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } = await import('chart.js');
+      const { Chart, CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend } = await import('chart.js');
       
-      Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+      Chart.register(CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend);
 
       // Destroy existing chart if it exists
       if (chartRef.current) {

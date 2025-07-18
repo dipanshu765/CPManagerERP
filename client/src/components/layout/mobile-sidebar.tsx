@@ -133,7 +133,11 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         <button
                           key={subIndex}
                           onClick={() => {
-                            console.log(`Navigate to ${subItem.path}`);
+                            if (subItem.path === '/reports/inward') {
+                              setLocation('/reports/inward');
+                            } else {
+                              console.log(`Navigate to ${subItem.path}`);
+                            }
                             onClose();
                           }}
                           className={cn(
