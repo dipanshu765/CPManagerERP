@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
-import { useIsMobile } from "../hooks/use-mobile";
-import Sidebar from "../components/layout/sidebar";
-import MobileSidebar from "../components/layout/mobile-sidebar";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Badge } from "../components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Sidebar from "@/components/layout/sidebar";
+import MobileSidebar from "@/components/layout/mobile-sidebar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { 
   Menu, 
   Plus, 
-  Minus, 
   Truck, 
   User, 
   FileText, 
@@ -23,26 +22,27 @@ import {
   Hash,
   Trash2,
   Save,
+  Calendar,
   X
 } from "lucide-react";
-import { useToast } from "../hooks/use-toast";
-import Loader from "../components/common/loader";
+import { useToast } from "@/hooks/use-toast";
+import Loader from "@/components/common/loader";
 
-// Static data for dropdowns
+// Static data for dropdowns based on your JSON structure
 const partyOptions = [
-  { id: 1, name: "ABC Trading Company" },
-  { id: 2, name: "XYZ Enterprises" },
+  { id: 1, name: "ABC Agro Limited" },
+  { id: 2, name: "XYZ Trading Company" },
   { id: 3, name: "Global Imports Ltd" },
   { id: 4, name: "Local Suppliers Co" },
   { id: 5, name: "Premium Goods Inc" }
 ];
 
 const brokerOptions = [
-  { id: 1, name: "Broker One" },
-  { id: 2, name: "Broker Two" },
-  { id: 3, name: "Broker Three" },
-  { id: 4, name: "Broker Four" },
-  { id: 5, name: "Broker Five" }
+  { id: 1, name: "Naveen" },
+  { id: 2, name: "Rakesh" },
+  { id: 3, name: "Suresh" },
+  { id: 4, name: "Mahesh" },
+  { id: 5, name: "Dinesh" }
 ];
 
 const stockItemOptions = [
@@ -68,14 +68,16 @@ export default function AddInward() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  // Form state
+  // Form state based on JSON structure
   const [formData, setFormData] = useState({
-    party_id: "",
+    date: new Date().toISOString().split('T')[0], // Current date
+    party_name: "",
     vehicle_no: "",
     bill_no: "",
-    broker_id: "",
+    broker_name: "",
     gross_weight: "",
     tare_weight: "",
+    net_weight: "",
     items: []
   });
 
@@ -89,9 +91,9 @@ export default function AddInward() {
 
   const addNewItem = () => {
     const newItem = {
-      id: Date.now(), // temporary ID
-      item_id: "",
-      quality_id: "",
+      id: Date.now(),
+      stock_item: "",
+      quality: "",
       brand: "",
       our_brand: "",
       number_of_bags: "",
@@ -99,8 +101,7 @@ export default function AddInward() {
       moisture: "",
       damaged_broken_grains: "",
       discoloured_grains: "",
-      remarks: "",
-      jali_details: []
+      remarks: ""
     };
     
     setFormData(prev => ({
@@ -125,53 +126,6 @@ export default function AddInward() {
     }));
   };
 
-  const addJaliDetail = (itemId) => {
-    const newJali = {
-      id: Date.now(), // temporary ID
-      jali_number: "",
-      weight_type: "",
-      weight_value: "",
-      bags_count: "",
-      remarks: ""
-    };
-
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => 
-        item.id === itemId 
-          ? { ...item, jali_details: [...item.jali_details, newJali] }
-          : item
-      )
-    }));
-  };
-
-  const removeJaliDetail = (itemId, jaliId) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => 
-        item.id === itemId 
-          ? { ...item, jali_details: item.jali_details.filter(jali => jali.id !== jaliId) }
-          : item
-      )
-    }));
-  };
-
-  const updateJaliDetail = (itemId, jaliId, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => 
-        item.id === itemId 
-          ? {
-              ...item,
-              jali_details: item.jali_details.map(jali => 
-                jali.id === jaliId ? { ...jali, [field]: value } : jali
-              )
-            }
-          : item
-      )
-    }));
-  };
-
   const handleSave = async () => {
     try {
       setIsSaving(true);
@@ -186,12 +140,14 @@ export default function AddInward() {
       
       // Reset form
       setFormData({
-        party_id: "",
+        date: new Date().toISOString().split('T')[0],
+        party_name: "",
         vehicle_no: "",
         bill_no: "",
-        broker_id: "",
+        broker_name: "",
         gross_weight: "",
         tare_weight: "",
+        net_weight: "",
         items: []
       });
       
@@ -279,19 +235,34 @@ export default function AddInward() {
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   
+                  {/* Date */}
+                  <div className="space-y-2">
+                    <Label htmlFor="date" className="text-sm font-medium flex items-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>Date</span>
+                    </Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData(prev => ({...prev, date: e.target.value}))}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                  </div>
+
                   {/* Party Selection */}
                   <div className="space-y-2">
                     <Label htmlFor="party" className="text-sm font-medium flex items-center space-x-1">
                       <Users className="h-4 w-4" />
                       <span>Party</span>
                     </Label>
-                    <Select value={formData.party_id} onValueChange={(value) => setFormData(prev => ({...prev, party_id: value}))}>
+                    <Select value={formData.party_name} onValueChange={(value) => setFormData(prev => ({...prev, party_name: value}))}>
                       <SelectTrigger className="border-2 border-gray-300 focus:border-black">
                         <SelectValue placeholder="Select party" />
                       </SelectTrigger>
                       <SelectContent>
                         {partyOptions.map(party => (
-                          <SelectItem key={party.id} value={party.id.toString()}>
+                          <SelectItem key={party.id} value={party.name}>
                             {party.name}
                           </SelectItem>
                         ))}
@@ -335,13 +306,13 @@ export default function AddInward() {
                       <User className="h-4 w-4" />
                       <span>Broker</span>
                     </Label>
-                    <Select value={formData.broker_id} onValueChange={(value) => setFormData(prev => ({...prev, broker_id: value}))}>
+                    <Select value={formData.broker_name} onValueChange={(value) => setFormData(prev => ({...prev, broker_name: value}))}>
                       <SelectTrigger className="border-2 border-gray-300 focus:border-black">
                         <SelectValue placeholder="Select broker" />
                       </SelectTrigger>
                       <SelectContent>
                         {brokerOptions.map(broker => (
-                          <SelectItem key={broker.id} value={broker.id.toString()}>
+                          <SelectItem key={broker.id} value={broker.name}>
                             {broker.name}
                           </SelectItem>
                         ))}
@@ -378,6 +349,23 @@ export default function AddInward() {
                       step="0.01"
                       value={formData.tare_weight}
                       onChange={(e) => setFormData(prev => ({...prev, tare_weight: e.target.value}))}
+                      className="border-2 border-gray-300 focus:border-black"
+                    />
+                  </div>
+
+                  {/* Net Weight */}
+                  <div className="space-y-2">
+                    <Label htmlFor="net_weight" className="text-sm font-medium flex items-center space-x-1">
+                      <Weight className="h-4 w-4" />
+                      <span>Net Weight</span>
+                    </Label>
+                    <Input
+                      id="net_weight"
+                      placeholder="1500.00"
+                      type="number"
+                      step="0.01"
+                      value={formData.net_weight}
+                      onChange={(e) => setFormData(prev => ({...prev, net_weight: e.target.value}))}
                       className="border-2 border-gray-300 focus:border-black"
                     />
                   </div>
@@ -453,15 +441,15 @@ export default function AddInward() {
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">Stock Item</Label>
                               <Select 
-                                value={item.item_id} 
-                                onValueChange={(value) => updateItem(item.id, 'item_id', value)}
+                                value={item.stock_item} 
+                                onValueChange={(value) => updateItem(item.id, 'stock_item', value)}
                               >
                                 <SelectTrigger className="border-2 border-gray-300 focus:border-black">
                                   <SelectValue placeholder="Select stock item" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {stockItemOptions.map(stockItem => (
-                                    <SelectItem key={stockItem.id} value={stockItem.id.toString()}>
+                                    <SelectItem key={stockItem.id} value={stockItem.name}>
                                       {stockItem.name}
                                     </SelectItem>
                                   ))}
@@ -473,15 +461,15 @@ export default function AddInward() {
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">Quality</Label>
                               <Select 
-                                value={item.quality_id} 
-                                onValueChange={(value) => updateItem(item.id, 'quality_id', value)}
+                                value={item.quality} 
+                                onValueChange={(value) => updateItem(item.id, 'quality', value)}
                               >
                                 <SelectTrigger className="border-2 border-gray-300 focus:border-black">
                                   <SelectValue placeholder="Select quality" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {qualityOptions.map(quality => (
-                                    <SelectItem key={quality.id} value={quality.id.toString()}>
+                                    <SelectItem key={quality.id} value={quality.name}>
                                       {quality.name}
                                     </SelectItem>
                                   ))}
@@ -578,7 +566,7 @@ export default function AddInward() {
                           </div>
 
                           {/* Remarks */}
-                          <div className="space-y-2">
+                          <div className="space-y-2 md:col-span-2 lg:col-span-3">
                             <Label className="text-sm font-medium">Remarks</Label>
                             <Textarea
                               placeholder="Full Body - 14%, Half Body - 34%"
@@ -586,124 +574,6 @@ export default function AddInward() {
                               onChange={(e) => updateItem(item.id, 'remarks', e.target.value)}
                               className="border-2 border-gray-300 focus:border-black min-h-[100px]"
                             />
-                          </div>
-
-                          {/* Jali Details Section */}
-                          <div className="border-t pt-4">
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center space-x-2">
-                                <Building2 className="h-4 w-4" />
-                                <span className="font-medium">Jali Details</span>
-                                <Badge variant="outline" className="bg-gray-200 text-gray-800">
-                                  {item.jali_details.length} entries
-                                </Badge>
-                              </div>
-                              <Button
-                                onClick={() => addJaliDetail(item.id)}
-                                variant="outline"
-                                size="sm"
-                                className="border-black text-black hover:bg-black hover:text-white"
-                              >
-                                <Plus className="mr-1 h-4 w-4" />
-                                Add Jali
-                              </Button>
-                            </div>
-
-                            {item.jali_details.length === 0 ? (
-                              <div className="text-center py-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  No jali details added. Click "Add Jali" to add entries.
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {item.jali_details.map((jali, jaliIndex) => (
-                                  <Card key={jali.id} className="border border-gray-200 bg-white dark:bg-gray-900">
-                                    <CardContent className="p-4">
-                                      <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-medium">Jali Entry {jaliIndex + 1}</span>
-                                        <Button
-                                          onClick={() => removeJaliDetail(item.id, jali.id)}
-                                          variant="outline"
-                                          size="sm"
-                                          className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                                        >
-                                          <X className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                      
-                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                                        
-                                        {/* Jali Number */}
-                                        <div className="space-y-1">
-                                          <Label className="text-xs font-medium">Jali Number</Label>
-                                          <Input
-                                            placeholder="J001"
-                                            value={jali.jali_number}
-                                            onChange={(e) => updateJaliDetail(item.id, jali.id, 'jali_number', e.target.value)}
-                                            className="border-2 border-gray-300 focus:border-black text-sm"
-                                          />
-                                        </div>
-
-                                        {/* Weight Type */}
-                                        <div className="space-y-1">
-                                          <Label className="text-xs font-medium">Weight Type</Label>
-                                          <Select 
-                                            value={jali.weight_type} 
-                                            onValueChange={(value) => updateJaliDetail(item.id, jali.id, 'weight_type', value)}
-                                          >
-                                            <SelectTrigger className="border-2 border-gray-300 focus:border-black text-sm">
-                                              <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="up">Up</SelectItem>
-                                              <SelectItem value="down">Down</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-
-                                        {/* Weight Value */}
-                                        <div className="space-y-1">
-                                          <Label className="text-xs font-medium">Weight Value</Label>
-                                          <Input
-                                            placeholder="750.00"
-                                            type="number"
-                                            step="0.01"
-                                            value={jali.weight_value}
-                                            onChange={(e) => updateJaliDetail(item.id, jali.id, 'weight_value', e.target.value)}
-                                            className="border-2 border-gray-300 focus:border-black text-sm"
-                                          />
-                                        </div>
-
-                                        {/* Bags Count */}
-                                        <div className="space-y-1">
-                                          <Label className="text-xs font-medium">Bags Count</Label>
-                                          <Input
-                                            placeholder="15"
-                                            type="number"
-                                            value={jali.bags_count}
-                                            onChange={(e) => updateJaliDetail(item.id, jali.id, 'bags_count', e.target.value)}
-                                            className="border-2 border-gray-300 focus:border-black text-sm"
-                                          />
-                                        </div>
-
-                                        {/* Remarks */}
-                                        <div className="space-y-1">
-                                          <Label className="text-xs font-medium">Remarks</Label>
-                                          <Input
-                                            placeholder="Remarks"
-                                            value={jali.remarks}
-                                            onChange={(e) => updateJaliDetail(item.id, jali.id, 'remarks', e.target.value)}
-                                            className="border-2 border-gray-300 focus:border-black text-sm"
-                                          />
-                                        </div>
-
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                ))}
-                              </div>
-                            )}
                           </div>
 
                         </CardContent>
