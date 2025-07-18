@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "../hooks/use-mobile";
 import Sidebar from "../components/layout/sidebar";
 import MobileSidebar from "../components/layout/mobile-sidebar";
@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
 import { 
@@ -25,6 +25,7 @@ import {
   Package
 } from "lucide-react";
 import { inwardEntriesData, inwardEntryDetail, supervisorList, godownList } from "../lib/static-data";
+import Loader from "../components/common/loader";
 
 export default function InwardReports() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -38,7 +39,16 @@ export default function InwardReports() {
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [selectedGodown, setSelectedGodown] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+
+  // Simulate loading reports data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredEntries = inwardEntriesData.filter(entry => {
     const matchesSearch = entry.sl_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -316,6 +326,9 @@ export default function InwardReports() {
               <FileText className="w-5 h-5" />
               <span>Inward Entry Details - {selectedEntry?.sl_no}</span>
             </DialogTitle>
+            <DialogDescription>
+              View and manage inward entry details including stock items and their approval status.
+            </DialogDescription>
           </DialogHeader>
           
           {selectedEntry && (
@@ -481,6 +494,11 @@ export default function InwardReports() {
             <DialogTitle>
               {newStatus === 'approved' ? 'Approve Item' : 'Reject Item'}
             </DialogTitle>
+            <DialogDescription>
+              {newStatus === 'approved' 
+                ? 'Select supervisor and godown to approve this item.' 
+                : 'Provide a reason for rejecting this item.'}
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -554,6 +572,9 @@ export default function InwardReports() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Loader */}
+      <Loader isLoading={isLoading} text="Loading inward reports" />
     </div>
   );
 }

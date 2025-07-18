@@ -124,3 +124,12 @@ Preferred communication style: Simple, everyday language.
 - **Cartographer**: Development mapping for Replit environment
 - **Error Overlay**: Runtime error modal for development
 - **Banner**: Development mode indicator when running outside Replit
+
+## Recent Changes: Latest modifications with dates
+
+### July 18, 2025
+- **Common Loader System**: Created universal "CP" branded loader component with theme-matching black/white colors and animations
+- **Fixed Dashboard Navigation**: Resolved issue where clicking dashboard from other screens wasn't properly navigating back
+- **Loading States**: Added consistent loading states across all pages (login, dashboard, inward reports, user list, import data)
+- **Dialog Accessibility**: Fixed missing Dialog descriptions that were causing accessibility warnings
+- **Enhanced UX**: Added realistic loading delays and proper loading text for each screen type

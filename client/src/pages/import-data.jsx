@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -6,11 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Menu, Database, Building2, Layers, Tags, Package, FileType, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Loader from "@/components/common/loader";
 
 export default function ImportData() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+
+  // Simulate loading import options
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, []);
 
   const importOptions = [
     {
@@ -234,6 +244,9 @@ export default function ImportData() {
           </div>
         </main>
       </div>
+      
+      {/* Loader */}
+      <Loader isLoading={isLoading} text="Loading import options" />
     </div>
   );
 }

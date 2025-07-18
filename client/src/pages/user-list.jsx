@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -7,11 +7,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Menu, Search, Plus, Edit, Trash2, User, Phone, Mail, Building, Calendar, Users } from "lucide-react";
+import Loader from "@/components/common/loader";
 
 export default function UserList() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+
+  // Simulate loading user data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 900);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Static user data based on API response
   const userData = [
@@ -333,6 +343,9 @@ export default function UserList() {
           </div>
         </main>
       </div>
+      
+      {/* Loader */}
+      <Loader isLoading={isLoading} text="Loading user list" />
     </div>
   );
 }

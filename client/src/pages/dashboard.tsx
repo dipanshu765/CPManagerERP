@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -11,10 +11,20 @@ import AdditionalMetrics from "@/components/dashboard/additional-metrics";
 import { Button } from "@/components/ui/button";
 import { Menu, Calendar } from "lucide-react";
 import { mockUser, mockDashboardData } from "@/lib/static-data";
+import Loader from "@/components/common/loader";
 
 export default function Dashboard() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+
+  // Simulate loading dashboard data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -91,6 +101,9 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+      
+      {/* Loader */}
+      <Loader isLoading={isLoading} text="Loading dashboard data" />
     </div>
   );
 }

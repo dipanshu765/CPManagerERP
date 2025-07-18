@@ -58,6 +58,9 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     } else if (path === "/users") {
       setLocation("/users");
       onClose();
+    } else if (path === "/dashboard") {
+      setLocation("/dashboard");
+      onClose();
     } else if (name === "Reports") {
       setIsReportsOpen(!isReportsOpen);
     } else if (path !== "/dashboard") {

@@ -10,11 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff, Shield, Lock, User, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Loader from "../components/common/loader";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [animatedElements, setAnimatedElements] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm({
@@ -40,6 +42,11 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
+      setIsLoading(true);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Static login validation
       if (data.email === "admin@cpmanager.com" && data.password === "admin123") {
         toast({
@@ -60,6 +67,8 @@ export default function Login() {
         description: "An error occurred during login",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -206,7 +215,8 @@ export default function Login() {
         </div>
       </div>
 
-
+      {/* Loader */}
+      <Loader isLoading={isLoading} text="Authenticating user" />
     </div>
   );
 }

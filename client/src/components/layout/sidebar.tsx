@@ -49,6 +49,8 @@ export default function Sidebar() {
       setLocation("/import");
     } else if (path === "/users") {
       setLocation("/users");
+    } else if (path === "/dashboard") {
+      setLocation("/dashboard");
     } else if (name === "Reports") {
       setIsReportsOpen(!isReportsOpen);
     } else if (path !== "/dashboard") {
