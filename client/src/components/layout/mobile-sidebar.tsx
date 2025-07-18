@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { sidebarMenuItems } from "@/lib/static-data";
@@ -10,7 +11,13 @@ import {
   UserPen, 
   ShieldCheck, 
   LogOut,
-  X
+  X,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Activity,
+  Clock,
+  TrendingUp
 } from "lucide-react";
 
 const iconMap = {
@@ -24,6 +31,14 @@ const iconMap = {
   "log-out": LogOut,
 };
 
+const reportSubMenus = [
+  { name: "Inward Reports", icon: FileText, path: "/reports/inward" },
+  { name: "Stock Journals", icon: BarChart3, path: "/reports/stock" },
+  { name: "Machine Performance", icon: Activity, path: "/reports/machine" },
+  { name: "Hamali Report", icon: TrendingUp, path: "/reports/hamali" },
+  { name: "Attendance Report", icon: Clock, path: "/reports/attendance" },
+];
+
 interface MobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,17 +46,27 @@ interface MobileSidebarProps {
 
 export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const [location, setLocation] = useLocation();
+  const [isReportsOpen, setIsReportsOpen] = useState(false);
 
   const handleNavigation = (path: string, name: string) => {
     if (name === "Log out") {
       setLocation("/login");
+      onClose();
     } else if (path === "/import") {
       setLocation("/import");
+      onClose();
+    } else if (path === "/users") {
+      setLocation("/users");
+      onClose();
+    } else if (name === "Reports") {
+      setIsReportsOpen(!isReportsOpen);
     } else if (path !== "/dashboard") {
       // For now, stay on dashboard for other routes
       console.log(`Navigate to ${path}`);
+      onClose();
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -66,7 +91,11 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         <nav className="mt-6">
           {sidebarMenuItems.map((item, index) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
-            const isActive = location === item.path || (item.name === "Dashboard" && location === "/dashboard") || (item.name === "Import Data" && location === "/import");
+            const isActive = location === item.path || 
+                            (item.name === "Dashboard" && location === "/dashboard") || 
+                            (item.name === "Import Data" && location === "/import") ||
+                            (item.name === "User List" && location === "/users") ||
+                            (item.name === "Reports" && location.startsWith("/reports"));
             
             return (
               <div key={index}>
@@ -74,13 +103,51 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 <button
                   onClick={() => handleNavigation(item.path, item.name)}
                   className={cn(
-                    "w-full flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-all text-left",
+                    "w-full flex items-center justify-between px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-all text-left",
                     isActive && "border-r-4 border-white bg-gray-700 text-white"
                   )}
                 >
-                  <Icon className="mr-3 h-5 w-5" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center">
+                    <Icon className="mr-3 h-5 w-5" />
+                    <span>{item.name}</span>
+                  </div>
+                  {item.name === "Reports" && (
+                    <div className="ml-2">
+                      {isReportsOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </div>
+                  )}
                 </button>
+                
+                {/* Reports Submenu */}
+                {item.name === "Reports" && isReportsOpen && (
+                  <div className="bg-gray-800 border-l-4 border-gray-600 ml-6">
+                    {reportSubMenus.map((subItem, subIndex) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = location === subItem.path;
+                      
+                      return (
+                        <button
+                          key={subIndex}
+                          onClick={() => {
+                            console.log(`Navigate to ${subItem.path}`);
+                            onClose();
+                          }}
+                          className={cn(
+                            "w-full flex items-center px-6 py-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-all text-left text-sm",
+                            isSubActive && "bg-gray-700 text-white"
+                          )}
+                        >
+                          <SubIcon className="mr-3 h-4 w-4" />
+                          <span>{subItem.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}

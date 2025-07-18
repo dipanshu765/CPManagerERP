@@ -7,6 +7,7 @@ import Login from "@/pages/login.jsx";
 import ForgotPassword from "@/pages/forgot-password";
 import Dashboard from "@/pages/dashboard";
 import ImportData from "@/pages/import-data.jsx";
+import UserList from "@/pages/user-list.jsx";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/import" component={ImportData} />
+      <Route path="/users" component={UserList} />
       <Route component={NotFound} />
     </Switch>
   );

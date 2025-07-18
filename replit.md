@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application built as an Enterprise Resource Planning (ERP) system called "CP Manager ERP". The application follows a modern monorepo structure with a React frontend and Express.js backend, using TypeScript throughout. The system currently focuses on dashboard functionality with user authentication and data visualization capabilities.
+This is a full-stack web application built as an Enterprise Resource Planning (ERP) system called "CP Manager ERP". The application follows a modern monorepo structure with a React frontend and Express.js backend, using TypeScript and JSX. The system includes comprehensive dashboard functionality, user management, data import capabilities, and animated UI components with a black/white theme design.
 
 ## User Preferences
 

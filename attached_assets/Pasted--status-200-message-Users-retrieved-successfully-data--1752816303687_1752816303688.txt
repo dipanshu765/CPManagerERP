@@ -1,0 +1,70 @@
+{
+    "status": 200,
+    "message": "Users retrieved successfully",
+    "data": [
+        {
+            "user_id": "USR0003",
+            "name": "Deep",
+            "mobile": "8888888888",
+            "email": "",
+            "role_name": "Lab Technician",
+            "branch_name": "WB Agro Pvt. Ltd - Main Branch - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        },
+        {
+            "user_id": "USR0004",
+            "name": "Naveen",
+            "mobile": "9845294229",
+            "email": null,
+            "role_name": "Supervisor",
+            "branch_name": "Rayapur - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        },
+        {
+            "user_id": "USR0006",
+            "name": "Raghavendra",
+            "mobile": "7022261890",
+            "email": null,
+            "role_name": "Supervisor",
+            "branch_name": "Rayapur - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        },
+        {
+            "user_id": "USR0007",
+            "name": "Santosh Kumbar",
+            "mobile": "7022261909",
+            "email": "",
+            "role_name": "Supervisor",
+            "branch_name": "Rayapur - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        },
+        {
+            "user_id": "USR0008",
+            "name": "Shivaji",
+            "mobile": "8431759614",
+            "email": "",
+            "role_name": "Supervisor",
+            "branch_name": "Rayapur - WB Agro Pvt. Ltd",
+            "created_at": "17-07-2025"
+        },
+        {
+            "user_id": "USR0005",
+            "name": "Shivanand",
+            "mobile": "7353353327",
+            "email": null,
+            "role_name": "Supervisor",
+            "branch_name": "Rayapur - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        },
+        {
+            "user_id": "USR0002",
+            "name": "Supervisor 1",
+            "mobile": "9999999991",
+            "email": "",
+            "role_name": "Supervisor",
+            "branch_name": "WB Agro Pvt. Ltd - Main Branch - WB Agro Pvt. Ltd",
+            "created_at": "16-07-2025"
+        }
+    ],
+    "count": 7
+}
