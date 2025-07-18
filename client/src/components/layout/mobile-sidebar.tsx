@@ -35,6 +35,8 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const handleNavigation = (path: string, name: string) => {
     if (name === "Log out") {
       setLocation("/login");
+    } else if (path === "/import") {
+      setLocation("/import");
     } else if (path !== "/dashboard") {
       // For now, stay on dashboard for other routes
       console.log(`Navigate to ${path}`);
@@ -64,7 +66,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         <nav className="mt-6">
           {sidebarMenuItems.map((item, index) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
-            const isActive = location === item.path || (item.name === "Dashboard" && location === "/dashboard");
+            const isActive = location === item.path || (item.name === "Dashboard" && location === "/dashboard") || (item.name === "Import Data" && location === "/import");
             
             return (
               <div key={index}>
