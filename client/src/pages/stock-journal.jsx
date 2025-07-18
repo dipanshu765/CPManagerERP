@@ -318,7 +318,7 @@ export default function StockJournal() {
   }
 
   return (
-    <div className="flex h-screen bg-white dark:bg-black">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
       <div className="hidden md:block">
         <Sidebar />

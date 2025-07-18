@@ -326,6 +326,7 @@ export const sidebarMenuItems = [
   { name: "Dashboard", icon: "gauge", path: "/dashboard", active: true },
   { name: "User List", icon: "users", path: "/users", active: false },
   { name: "Import Data", icon: "upload", path: "/import", active: false },
+  { name: "Add Inward", icon: "plus", path: "/add-inward", active: false },
   { name: "Control Settings", icon: "settings", path: "/settings", active: false },
   { name: "Reports", icon: "bar-chart-3", path: "/reports", active: false },
   { name: "Edit Profile", icon: "user-pen", path: "/profile", active: false },

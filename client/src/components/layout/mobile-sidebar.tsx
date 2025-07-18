@@ -6,6 +6,7 @@ import {
   Gauge, 
   Users, 
   Upload, 
+  Plus,
   Settings, 
   BarChart3, 
   UserPen, 
@@ -24,6 +25,7 @@ const iconMap = {
   gauge: Gauge,
   users: Users,
   upload: Upload,
+  plus: Plus,
   settings: Settings,
   "bar-chart-3": BarChart3,
   "user-pen": UserPen,
@@ -98,6 +100,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                             (item.name === "Dashboard" && location === "/dashboard") || 
                             (item.name === "Import Data" && location === "/import") ||
                             (item.name === "User List" && location === "/users") ||
+                            (item.name === "Add Inward" && location === "/add-inward") ||
                             (item.name === "Reports" && location.startsWith("/reports"));
             
             return (
