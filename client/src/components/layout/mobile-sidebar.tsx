@@ -63,6 +63,9 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     } else if (path === "/dashboard") {
       setLocation("/dashboard");
       onClose();
+    } else if (path === "/add-inward") {
+      setLocation("/add-inward");
+      onClose();
     } else if (name === "Reports") {
       setIsReportsOpen(!isReportsOpen);
     } else if (path !== "/dashboard") {
@@ -109,7 +112,8 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 <button
                   onClick={() => handleNavigation(item.path, item.name)}
                   className={cn(
-                    "w-full flex items-center justify-between px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-all text-left",
+                    "w-full flex items-center justify-between px-6 py-3 transition-all text-left",
+                    item.name === "Log out" ? "text-white hover:bg-gray-700 hover:text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white",
                     isActive && "border-r-4 border-white bg-gray-700 text-white"
                   )}
                 >

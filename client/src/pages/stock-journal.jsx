@@ -509,37 +509,37 @@ export default function StockJournal() {
           {selectedEntry && (
             <div className="space-y-6">
               {/* Header Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-r from-black to-gray-800 text-white rounded-lg border-2 border-black shadow-xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-black shadow-xl">
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Hash className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-yellow-300">Transaction ID:</span>
-                    <span className="text-sm text-white font-bold">{selectedEntry.transaction_id}</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Transaction ID:</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.transaction_id}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-yellow-300">Voucher Number:</span>
-                    <span className="text-sm text-white font-bold">{selectedEntry.voucher_number}</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Voucher Number:</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.voucher_number}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-yellow-300">Date:</span>
-                    <span className="text-sm text-white font-bold">{selectedEntry.date}</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Date:</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.date}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Building2 className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-yellow-300">Voucher Type:</span>
-                    <span className="text-sm text-white font-bold">{selectedEntry.voucher_type_name}</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Voucher Type:</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.voucher_type_name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-yellow-300">Destination Godown:</span>
-                    <span className="text-sm text-white font-bold">{selectedEntry.destination_godown}</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Destination Godown:</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.destination_godown}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-yellow-300">Tally Sync:</span>
+                    <span className="text-sm font-medium text-black dark:text-white">Tally Sync:</span>
                     {getSyncBadge(selectedEntry.is_tally_synced)}
                   </div>
                 </div>
@@ -548,7 +548,7 @@ export default function StockJournal() {
               {/* Inventory Entries In */}
               {selectedEntry.inventory_entries_in && selectedEntry.inventory_entries_in.length > 0 && (
                 <div style={{animation: 'slide-in-left 0.6s ease-out forwards'}}>
-                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-gradient-to-r from-green-600 to-green-700 text-white p-3 rounded-lg border-2 border-black shadow-lg">
+                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-green-500 shadow-lg">
                     <ArrowRight className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries In</span>
                   </h4>
@@ -556,33 +556,33 @@ export default function StockJournal() {
                     {selectedEntry.inventory_entries_in.map((entry, index) => (
                       <Card 
                         key={index} 
-                        className="bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 border-2 border-black card-hover-effect transform transition-all duration-500 hover:scale-105"
+                        className="bg-white dark:bg-gray-900 border-2 border-green-500 card-hover-effect transform transition-all duration-500 hover:scale-105"
                         style={{
                           animationDelay: `${index * 200}ms`,
                           animation: 'fade-in-up 0.6s ease-out forwards'
                         }}
                       >
                         <CardContent className="p-4 relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-300/20 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-500/10 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
                           <div className="relative z-10">
                             <div className="flex items-center justify-between mb-3">
                               <h5 className="font-bold text-black dark:text-white text-lg">
                                 {entry.stock_item}
                               </h5>
-                              <Badge variant="outline" className="bg-black text-white border-green-400 border-2 font-bold text-lg px-3 py-1 pulse-glow">
+                              <Badge variant="outline" className="bg-white text-black border-green-500 border-2 font-bold text-lg px-3 py-1 pulse-glow">
                                 {entry.actual_qty.full_text}
                               </Badge>
                             </div>
                             <div className="space-y-2">
                               {entry.batch_allocations.map((batch, batchIndex) => (
-                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-gradient-to-r from-black to-gray-800 text-white p-3 rounded border-2 border-green-400 hover:scale-105 transition-transform duration-300">
+                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-green-500 hover:scale-105 transition-transform duration-300">
                                   <div className="flex items-center space-x-2">
                                     <Package className="h-4 w-4 text-green-400 animate-pulse" />
-                                    <span className="font-bold text-yellow-300">{batch.batch_name}</span>
-                                    <span className="text-green-400">•</span>
-                                    <span className="text-white">{batch.godown}</span>
+                                    <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
+                                    <span className="text-green-500">•</span>
+                                    <span className="text-black dark:text-white">{batch.godown}</span>
                                   </div>
-                                  <span className="font-bold text-yellow-300">{batch.actual_qty.full_text}</span>
+                                  <span className="font-bold text-black dark:text-white">{batch.actual_qty.full_text}</span>
                                 </div>
                               ))}
                             </div>
@@ -597,7 +597,7 @@ export default function StockJournal() {
               {/* Inventory Entries Out */}
               {selectedEntry.inventory_entries_out && selectedEntry.inventory_entries_out.length > 0 && (
                 <div style={{animation: 'slide-in-right 0.6s ease-out forwards'}}>
-                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-gradient-to-r from-red-600 to-red-700 text-white p-3 rounded-lg border-2 border-black shadow-lg">
+                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-red-500 shadow-lg">
                     <ArrowLeft className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries Out</span>
                   </h4>
@@ -605,33 +605,33 @@ export default function StockJournal() {
                     {selectedEntry.inventory_entries_out.map((entry, index) => (
                       <Card 
                         key={index} 
-                        className="bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 border-2 border-black card-hover-effect transform transition-all duration-500 hover:scale-105"
+                        className="bg-white dark:bg-gray-900 border-2 border-red-500 card-hover-effect transform transition-all duration-500 hover:scale-105"
                         style={{
                           animationDelay: `${index * 200}ms`,
                           animation: 'fade-in-up 0.6s ease-out forwards'
                         }}
                       >
                         <CardContent className="p-4 relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-300/20 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
                           <div className="relative z-10">
                             <div className="flex items-center justify-between mb-3">
                               <h5 className="font-bold text-black dark:text-white text-lg">
                                 {entry.stock_item}
                               </h5>
-                              <Badge variant="outline" className="bg-black text-white border-red-400 border-2 font-bold text-lg px-3 py-1 pulse-glow">
+                              <Badge variant="outline" className="bg-white text-black border-red-500 border-2 font-bold text-lg px-3 py-1 pulse-glow">
                                 {entry.actual_qty.full_text}
                               </Badge>
                             </div>
                             <div className="space-y-2">
                               {entry.batch_allocations.map((batch, batchIndex) => (
-                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-gradient-to-r from-black to-gray-800 text-white p-3 rounded border-2 border-red-400 hover:scale-105 transition-transform duration-300">
+                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-red-500 hover:scale-105 transition-transform duration-300">
                                   <div className="flex items-center space-x-2">
                                     <Package className="h-4 w-4 text-red-400 animate-pulse" />
-                                    <span className="font-bold text-yellow-300">{batch.batch_name}</span>
-                                    <span className="text-red-400">•</span>
-                                    <span className="text-white">{batch.godown}</span>
+                                    <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
+                                    <span className="text-red-500">•</span>
+                                    <span className="text-black dark:text-white">{batch.godown}</span>
                                   </div>
-                                  <span className="font-bold text-yellow-300">{batch.actual_qty.full_text}</span>
+                                  <span className="font-bold text-black dark:text-white">{batch.actual_qty.full_text}</span>
                                 </div>
                               ))}
                             </div>
