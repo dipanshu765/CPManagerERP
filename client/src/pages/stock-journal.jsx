@@ -292,21 +292,21 @@ export default function StockJournal() {
 
   const getVoucherTypeBadge = (voucherType) => {
     if (voucherType.includes("Production")) {
-      return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Production</Badge>;
+      return <Badge variant="default" className="bg-gradient-to-r from-green-500 to-green-600 text-white border-black border-2 badge-bounce hover:from-green-600 hover:to-green-700 transition-all duration-300">Production</Badge>;
     } else if (voucherType.includes("Consumption")) {
-      return <Badge variant="default" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Consumption</Badge>;
+      return <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-black border-2 badge-bounce hover:from-blue-600 hover:to-blue-700 transition-all duration-300">Consumption</Badge>;
     }
-    return <Badge variant="secondary">{voucherType}</Badge>;
+    return <Badge variant="secondary" className="border-black border-2">{voucherType}</Badge>;
   };
 
   const getSyncBadge = (isSynced) => {
     return isSynced ? (
-      <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-        <CheckCircle className="mr-1 h-3 w-3" />
+      <Badge variant="default" className="bg-gradient-to-r from-black to-gray-800 text-white border-green-400 border-2 pulse-glow">
+        <CheckCircle className="mr-1 h-3 w-3 animate-pulse" />
         Synced
       </Badge>
     ) : (
-      <Badge variant="default" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+      <Badge variant="default" className="bg-gradient-to-r from-red-600 to-red-700 text-white border-black border-2 animate-pulse">
         <XCircle className="mr-1 h-3 w-3" />
         Not Synced
       </Badge>
@@ -318,7 +318,7 @@ export default function StockJournal() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-white dark:bg-black">
       {/* Sidebar */}
       <div className="hidden md:block">
         <Sidebar />
@@ -406,7 +406,7 @@ export default function StockJournal() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900">
           <div className="space-y-4">
             {filteredEntries.length === 0 ? (
               <Card>
@@ -421,10 +421,20 @@ export default function StockJournal() {
                 </CardContent>
               </Card>
             ) : (
-              filteredEntries.map((entry) => (
-                <Card key={entry.transaction_id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+              filteredEntries.map((entry, index) => (
+                <Card 
+                  key={entry.transaction_id} 
+                  className="card-hover-effect border-2 border-gray-200 dark:border-gray-700 hover:border-black dark:hover:border-white transition-all duration-500 transform hover:scale-[1.02]"
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                    animation: 'fade-in-up 0.6s ease-out forwards'
+                  }}
+                >
+                  <CardContent className="p-6 relative overflow-hidden">
+                    {/* Animated background gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-4 mb-3">
                           <div className="flex items-center space-x-2">
@@ -467,12 +477,13 @@ export default function StockJournal() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewDetails(entry)}
-                          className="flex items-center space-x-1"
+                          className="flex items-center space-x-1 bg-gradient-to-r from-black to-gray-800 text-white border-2 border-black hover:from-gray-800 hover:to-black hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-black/50"
                         >
-                          <Eye className="h-4 w-4" />
-                          <span>View Details</span>
+                          <Eye className="h-4 w-4 animate-pulse" />
+                          <span className="font-semibold">View Details</span>
                         </Button>
                       </div>
+                    </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -498,37 +509,37 @@ export default function StockJournal() {
           {selectedEntry && (
             <div className="space-y-6">
               {/* Header Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-r from-black to-gray-800 text-white rounded-lg border-2 border-black shadow-xl">
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Hash className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Transaction ID:</span>
-                    <span className="text-sm">{selectedEntry.transaction_id}</span>
+                    <span className="text-sm font-medium text-yellow-300">Transaction ID:</span>
+                    <span className="text-sm text-white font-bold">{selectedEntry.transaction_id}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Voucher Number:</span>
-                    <span className="text-sm">{selectedEntry.voucher_number}</span>
+                    <span className="text-sm font-medium text-yellow-300">Voucher Number:</span>
+                    <span className="text-sm text-white font-bold">{selectedEntry.voucher_number}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Date:</span>
-                    <span className="text-sm">{selectedEntry.date}</span>
+                    <span className="text-sm font-medium text-yellow-300">Date:</span>
+                    <span className="text-sm text-white font-bold">{selectedEntry.date}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Building2 className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Voucher Type:</span>
-                    <span className="text-sm">{selectedEntry.voucher_type_name}</span>
+                    <span className="text-sm font-medium text-yellow-300">Voucher Type:</span>
+                    <span className="text-sm text-white font-bold">{selectedEntry.voucher_type_name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Destination Godown:</span>
-                    <span className="text-sm">{selectedEntry.destination_godown}</span>
+                    <span className="text-sm font-medium text-yellow-300">Destination Godown:</span>
+                    <span className="text-sm text-white font-bold">{selectedEntry.destination_godown}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">Tally Sync:</span>
+                    <span className="text-sm font-medium text-yellow-300">Tally Sync:</span>
                     {getSyncBadge(selectedEntry.is_tally_synced)}
                   </div>
                 </div>
@@ -536,35 +547,45 @@ export default function StockJournal() {
 
               {/* Inventory Entries In */}
               {selectedEntry.inventory_entries_in && selectedEntry.inventory_entries_in.length > 0 && (
-                <div>
-                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4">
-                    <ArrowRight className="h-5 w-5 text-green-600" />
+                <div style={{animation: 'slide-in-left 0.6s ease-out forwards'}}>
+                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-gradient-to-r from-green-600 to-green-700 text-white p-3 rounded-lg border-2 border-black shadow-lg">
+                    <ArrowRight className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries In</span>
                   </h4>
                   <div className="space-y-4">
                     {selectedEntry.inventory_entries_in.map((entry, index) => (
-                      <Card key={index} className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="font-medium text-green-900 dark:text-green-100">
-                              {entry.stock_item}
-                            </h5>
-                            <Badge variant="outline" className="text-green-700 border-green-300">
-                              {entry.actual_qty.full_text}
-                            </Badge>
-                          </div>
-                          <div className="space-y-2">
-                            {entry.batch_allocations.map((batch, batchIndex) => (
-                              <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 p-2 rounded">
-                                <div className="flex items-center space-x-2">
-                                  <Package className="h-4 w-4 text-gray-500" />
-                                  <span className="font-medium">{batch.batch_name}</span>
-                                  <span className="text-gray-500">•</span>
-                                  <span className="text-gray-600 dark:text-gray-400">{batch.godown}</span>
+                      <Card 
+                        key={index} 
+                        className="bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 border-2 border-black card-hover-effect transform transition-all duration-500 hover:scale-105"
+                        style={{
+                          animationDelay: `${index * 200}ms`,
+                          animation: 'fade-in-up 0.6s ease-out forwards'
+                        }}
+                      >
+                        <CardContent className="p-4 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-300/20 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                              <h5 className="font-bold text-black dark:text-white text-lg">
+                                {entry.stock_item}
+                              </h5>
+                              <Badge variant="outline" className="bg-black text-white border-green-400 border-2 font-bold text-lg px-3 py-1 pulse-glow">
+                                {entry.actual_qty.full_text}
+                              </Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {entry.batch_allocations.map((batch, batchIndex) => (
+                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-gradient-to-r from-black to-gray-800 text-white p-3 rounded border-2 border-green-400 hover:scale-105 transition-transform duration-300">
+                                  <div className="flex items-center space-x-2">
+                                    <Package className="h-4 w-4 text-green-400 animate-pulse" />
+                                    <span className="font-bold text-yellow-300">{batch.batch_name}</span>
+                                    <span className="text-green-400">•</span>
+                                    <span className="text-white">{batch.godown}</span>
+                                  </div>
+                                  <span className="font-bold text-yellow-300">{batch.actual_qty.full_text}</span>
                                 </div>
-                                <span className="text-gray-900 dark:text-white">{batch.actual_qty.full_text}</span>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -575,35 +596,45 @@ export default function StockJournal() {
 
               {/* Inventory Entries Out */}
               {selectedEntry.inventory_entries_out && selectedEntry.inventory_entries_out.length > 0 && (
-                <div>
-                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4">
-                    <ArrowLeft className="h-5 w-5 text-red-600" />
+                <div style={{animation: 'slide-in-right 0.6s ease-out forwards'}}>
+                  <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-gradient-to-r from-red-600 to-red-700 text-white p-3 rounded-lg border-2 border-black shadow-lg">
+                    <ArrowLeft className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries Out</span>
                   </h4>
                   <div className="space-y-4">
                     {selectedEntry.inventory_entries_out.map((entry, index) => (
-                      <Card key={index} className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="font-medium text-red-900 dark:text-red-100">
-                              {entry.stock_item}
-                            </h5>
-                            <Badge variant="outline" className="text-red-700 border-red-300">
-                              {entry.actual_qty.full_text}
-                            </Badge>
-                          </div>
-                          <div className="space-y-2">
-                            {entry.batch_allocations.map((batch, batchIndex) => (
-                              <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 p-2 rounded">
-                                <div className="flex items-center space-x-2">
-                                  <Package className="h-4 w-4 text-gray-500" />
-                                  <span className="font-medium">{batch.batch_name}</span>
-                                  <span className="text-gray-500">•</span>
-                                  <span className="text-gray-600 dark:text-gray-400">{batch.godown}</span>
+                      <Card 
+                        key={index} 
+                        className="bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 border-2 border-black card-hover-effect transform transition-all duration-500 hover:scale-105"
+                        style={{
+                          animationDelay: `${index * 200}ms`,
+                          animation: 'fade-in-up 0.6s ease-out forwards'
+                        }}
+                      >
+                        <CardContent className="p-4 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-300/20 to-transparent -skew-y-1 transform scale-110 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                              <h5 className="font-bold text-black dark:text-white text-lg">
+                                {entry.stock_item}
+                              </h5>
+                              <Badge variant="outline" className="bg-black text-white border-red-400 border-2 font-bold text-lg px-3 py-1 pulse-glow">
+                                {entry.actual_qty.full_text}
+                              </Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {entry.batch_allocations.map((batch, batchIndex) => (
+                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-gradient-to-r from-black to-gray-800 text-white p-3 rounded border-2 border-red-400 hover:scale-105 transition-transform duration-300">
+                                  <div className="flex items-center space-x-2">
+                                    <Package className="h-4 w-4 text-red-400 animate-pulse" />
+                                    <span className="font-bold text-yellow-300">{batch.batch_name}</span>
+                                    <span className="text-red-400">•</span>
+                                    <span className="text-white">{batch.godown}</span>
+                                  </div>
+                                  <span className="font-bold text-yellow-300">{batch.actual_qty.full_text}</span>
                                 </div>
-                                <span className="text-gray-900 dark:text-white">{batch.actual_qty.full_text}</span>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
