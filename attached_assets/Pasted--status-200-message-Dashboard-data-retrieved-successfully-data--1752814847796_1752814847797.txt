@@ -1,0 +1,113 @@
+{
+    "status": 200,
+    "message": "Dashboard data retrieved successfully",
+    "data": {
+        "date": "18-07-2025",
+        "user_info": {
+            "user_id": "USR0001",
+            "name": "Mukesh Bafna",
+            "admin_id": "USR0001",
+            "role_id": 1,
+            "role": "Admin",
+            "is_admin": true,
+            "organization": "WB Agro Pvt. Ltd",
+            "branch": "WB Agro Pvt. Ltd - Main Branch"
+        },
+        "voucher_summary": {
+            "voucher_types": [
+                {
+                    "voucher_type_name": "Sj Consumption [R]",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": true,
+                    "in_source": false,
+                    "in_destination": true,
+                    "source_alias": "Raw Item",
+                    "destination_alias": "Process Item"
+                },
+                {
+                    "voucher_type_name": "Sj Consumption [T]",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": true,
+                    "in_source": false,
+                    "in_destination": true,
+                    "source_alias": "Raw Item",
+                    "destination_alias": "Process Item"
+                },
+                {
+                    "voucher_type_name": "Sj Production [R]",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": true,
+                    "in_source": true,
+                    "in_destination": false,
+                    "source_alias": "Process Item",
+                    "destination_alias": "Final Item"
+                },
+                {
+                    "voucher_type_name": "Sj Production [T]",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": true,
+                    "in_source": true,
+                    "in_destination": false,
+                    "source_alias": "Process Item",
+                    "destination_alias": "Final Item"
+                },
+                {
+                    "voucher_type_name": "Sj Brand Transfer",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": true,
+                    "in_source": true,
+                    "in_destination": true,
+                    "source_alias": "Source Item",
+                    "destination_alias": "Destination Item"
+                },
+                {
+                    "voucher_type_name": "Sj Stock Transfer",
+                    "total_transaction_count": 0,
+                    "user_transaction_count": 0,
+                    "is_batch": false,
+                    "is_bardan": false,
+                    "in_source": false,
+                    "in_destination": false,
+                    "source_alias": "Source Item",
+                    "destination_alias": "Destination Item"
+                }
+            ],
+            "total_voucher_types": 6,
+            "total_organization_transactions": 0,
+            "total_user_transactions": 0
+        },
+        "hamali_summary": {
+            "total_hamali_entries": 0,
+            "total_hamali_amount": 0.0,
+            "transfer_types": []
+        },
+        "stock_items_summary": {
+            "is_synced": true,
+            "difference": 0,
+            "tally_item_count": 1628,
+            "synced_item_count": 1628
+        },
+        "inward_entries_summary": {
+            "total_count": 0,
+            "approved_count": 0,
+            "pending_count": 0,
+            "rejected_count": 0,
+            "error": null
+        },
+        "tally_running_status": true
+    },
+    "filters_applied": {
+        "date": "18-07-2025",
+        "branch": "WB Agro Pvt. Ltd - Main Branch"
+    }
+}
