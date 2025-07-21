@@ -41,16 +41,28 @@ const jaliDetailSchema = z.object({
   jali_number: z.string().min(1, "Jali number is required"),
   weight_type: z.enum(["up", "down"]),
   weight_value: z.string().min(1, "Weight value is required"),
-  bags_count: z.number().min(1, "Bags count must be at least 1"),
+  bags_count: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Bags count must be at least 1"),
   remarks: z.string().optional(),
 });
 
 const itemSchema = z.object({
-  item_id: z.number().min(1, "Stock item is required"),
-  quality_id: z.number().min(1, "Quality is required"),
+  item_id: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Stock item is required"),
+  quality_id: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Quality is required"),
   brand: z.string().min(1, "Brand is required"),
   our_brand: z.string().min(1, "Our brand is required"),
-  number_of_bags: z.number().min(1, "Number of bags is required"),
+  number_of_bags: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Number of bags is required"),
   total_weight: z.string().min(1, "Total weight is required"),
   moisture: z.string().min(1, "Moisture is required"),
   damaged_broken_grains: z.string().min(1, "Damaged/broken grains is required"),
@@ -60,10 +72,16 @@ const itemSchema = z.object({
 });
 
 const addInwardSchema = z.object({
-  party_id: z.number().min(1, "Party is required"),
+  party_id: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Party is required"),
   vehicle_no: z.string().min(1, "Vehicle number is required"),
   bill_no: z.string().min(1, "Bill number is required"),
-  broker_id: z.number().min(1, "Broker is required"),
+  broker_id: z.union([z.number(), z.string()]).refine((val) => {
+    const num = typeof val === 'string' ? parseInt(val) : val;
+    return !isNaN(num) && num > 0;
+  }, "Broker is required"),
   gross_weight: z.string().min(1, "Gross weight is required"),
   tare_weight: z.string().min(1, "Tare weight is required"),
   items: z.array(itemSchema).min(1, "At least one item is required"),
@@ -79,18 +97,18 @@ export default function AddInward() {
   const form = useForm({
     resolver: zodResolver(addInwardSchema),
     defaultValues: {
-      party_id: 0,
+      party_id: "",
       vehicle_no: "",
       bill_no: "",
-      broker_id: 0,
+      broker_id: "",
       gross_weight: "",
       tare_weight: "",
       items: [{
-        item_id: 0,
-        quality_id: 0,
+        item_id: "",
+        quality_id: "",
         brand: "",
         our_brand: "",
-        number_of_bags: 1,
+        number_of_bags: "",
         total_weight: "",
         moisture: "",
         damaged_broken_grains: "",
@@ -100,7 +118,7 @@ export default function AddInward() {
           jali_number: "",
           weight_type: "up",
           weight_value: "",
-          bags_count: 1,
+          bags_count: "",
           remarks: "",
         }]
       }]
@@ -171,10 +189,13 @@ export default function AddInward() {
     onSuccess: (data) => {
       if (data.status === 201) {
         toast({
-          title: "Success",
+          title: "✅ Success",
           description: "Inward entry created successfully",
+          className: "bg-green-50 border-green-200 text-green-800",
         });
         form.reset();
+        // Scroll to top to show success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         toast({
           title: "Error",
@@ -202,11 +223,11 @@ export default function AddInward() {
 
   const addNewItem = () => {
     appendItem({
-      item_id: 0,
-      quality_id: 0,
+      item_id: "",
+      quality_id: "",
       brand: "",
       our_brand: "",
-      number_of_bags: 1,
+      number_of_bags: "",
       total_weight: "",
       moisture: "",
       damaged_broken_grains: "",
@@ -216,7 +237,7 @@ export default function AddInward() {
         jali_number: "",
         weight_type: "up",
         weight_value: "",
-        bags_count: 1,
+        bags_count: "",
         remarks: "",
       }]
     });
@@ -230,7 +251,7 @@ export default function AddInward() {
         jali_number: "",
         weight_type: "up",
         weight_value: "",
-        bags_count: 1,
+        bags_count: "",
         remarks: "",
       }
     ]);
@@ -246,7 +267,24 @@ export default function AddInward() {
 
   const onSubmit = async (data) => {
     try {
-      await submitMutation.mutateAsync(data);
+      // Transform data to ensure correct types
+      const transformedData = {
+        ...data,
+        party_id: typeof data.party_id === 'string' ? parseInt(data.party_id) : data.party_id,
+        broker_id: typeof data.broker_id === 'string' ? parseInt(data.broker_id) : data.broker_id,
+        items: data.items.map(item => ({
+          ...item,
+          item_id: typeof item.item_id === 'string' ? parseInt(item.item_id) : item.item_id,
+          quality_id: typeof item.quality_id === 'string' ? parseInt(item.quality_id) : item.quality_id,
+          number_of_bags: typeof item.number_of_bags === 'string' ? parseInt(item.number_of_bags) : item.number_of_bags,
+          jali_details: item.jali_details.map(jali => ({
+            ...jali,
+            bags_count: typeof jali.bags_count === 'string' ? parseInt(jali.bags_count) : jali.bags_count,
+          }))
+        }))
+      };
+      
+      await submitMutation.mutateAsync(transformedData);
     } catch (error) {
       console.error("Form submission error:", error);
     }
@@ -290,7 +328,7 @@ export default function AddInward() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
             <Card>
