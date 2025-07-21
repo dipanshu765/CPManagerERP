@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -9,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Menu, 
   Search, 
@@ -23,271 +29,135 @@ import {
   ArrowRight,
   ArrowLeft,
   Building2,
-  Hash
+  Hash,
+  CalendarIcon,
+  RotateCw,
+  Filter,
+  RefreshCw
 } from "lucide-react";
 import Loader from "@/components/common/loader";
+// Note: Type imports are commented out since this is a JSX file
+// import { StockJournal, VoucherType, StockJournalDetail, StockJournalFilters } from "@shared/schema";
 
-// Static data based on the API response
-const stockJournalData = [
-  {
-    transaction_id: "TR000011",
-    voucher_type_name: "Sj Production [R]",
-    voucher_number: "NAV006",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 12:31:53",
-    updated_at: "2025-07-18 12:31:53"
-  },
-  {
-    transaction_id: "TR000010",
-    voucher_type_name: "Sj Production [R]",
-    voucher_number: "NAV005",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 12:27:06",
-    updated_at: "2025-07-18 12:27:07"
-  },
-  {
-    transaction_id: "TR000009",
-    voucher_type_name: "Sj Production [R]",
-    voucher_number: "SHI005",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 12:15:19",
-    updated_at: "2025-07-18 12:15:19"
-  },
-  {
-    transaction_id: "TR000008",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "NAV004",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:51:04",
-    updated_at: "2025-07-18 11:51:04"
-  },
-  {
-    transaction_id: "TR000007",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "NAV003",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:43:19",
-    updated_at: "2025-07-18 11:43:19"
-  },
-  {
-    transaction_id: "TR000006",
-    voucher_type_name: "Sj Production [R]",
-    voucher_number: "SHI004",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:41:03",
-    updated_at: "2025-07-18 11:41:03"
-  },
-  {
-    transaction_id: "TR000005",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "NAV002",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:38:45",
-    updated_at: "2025-07-18 11:38:45"
-  },
-  {
-    transaction_id: "TR000004",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "NAV001",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:30:35",
-    updated_at: "2025-07-18 11:30:35"
-  },
-  {
-    transaction_id: "TR000003",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "SHI003",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:30:14",
-    updated_at: "2025-07-18 11:30:14"
-  },
-  {
-    transaction_id: "TR000002",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "SHI002",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 11:30:11",
-    updated_at: "2025-07-18 11:30:11"
-  },
-  {
-    transaction_id: "TR000001",
-    voucher_type_name: "Sj Consumption [R]",
-    voucher_number: "SHI001",
-    date: "18-07-2025",
-    effective_date: "18-07-2025",
-    is_tally_synced: true,
-    created_at: "2025-07-18 10:49:45",
-    updated_at: "2025-07-18 10:49:46"
-  }
-];
+// Helper function to format date for API
+const formatDateForApi = (date) => {
+  return date ? format(new Date(date), "dd-MM-yyyy") : "";
+};
 
-// Static detail data based on the API response
-const stockJournalDetailData = {
-  transaction_id: "TR000001",
-  voucher_type_name: "Sj Consumption [R]",
-  voucher_number: "SHI001",
-  remarks: "",
-  date: "2025-07-18",
-  effective_date: "2025-07-18",
-  destination_godown: "Godown No 1",
-  inventory_entries_in: [
-    {
-      stock_item: "Process Gramdall Loose Rayapur [15.1.24]",
-      actual_qty: {
-        primary_qty: 250.0,
-        primary_unit: "bags",
-        secondary_qty: 250.0,
-        secondary_unit: "qtl",
-        full_text: "250.00 bags = 250.00 qtl"
-      },
-      batch_allocations: [
-        {
-          batch_name: "Primary",
-          godown: "Godown No 1",
-          destination_godown: "Godown No 1",
-          actual_qty: {
-            primary_qty: 250.0,
-            primary_unit: "bags",
-            secondary_qty: 250.0,
-            secondary_unit: "qtl",
-            full_text: "250 bags = 250.0 qtl"
-          }
-        }
-      ]
-    },
-    {
-      stock_item: "Bardan Reject",
-      actual_qty: {
-        primary_qty: 500.0,
-        primary_unit: "pkt",
-        secondary_qty: 0.0,
-        secondary_unit: "",
-        full_text: "500.00 pkt"
-      },
-      batch_allocations: [
-        {
-          batch_name: "Primary",
-          godown: "A Main Location",
-          destination_godown: "A Main Location",
-          actual_qty: {
-            primary_qty: 500.0,
-            primary_unit: "pkt",
-            secondary_qty: 0.0,
-            secondary_unit: "",
-            full_text: "500 pkt"
-          }
-        }
-      ]
-    }
-  ],
-  inventory_entries_out: [
-    {
-      stock_item: "Raw Turdal Patka [Wb Gold ] New [50kg]",
-      actual_qty: {
-        primary_qty: 370.0,
-        primary_unit: "pkt",
-        secondary_qty: 185.0,
-        secondary_unit: "qtl",
-        full_text: "370.00 pkt = 185.00 qtl"
-      },
-      batch_allocations: [
-        {
-          batch_name: "0640/500/KAUSHAL/24.3",
-          godown: "Godown No 2",
-          destination_godown: "Godown No 2",
-          actual_qty: {
-            primary_qty: 200.0,
-            primary_unit: "pkt",
-            secondary_qty: 100.0,
-            secondary_unit: "qtl",
-            full_text: "200 pkt = 100.0 qtl"
-          }
-        },
-        {
-          batch_name: "5004/170/BABA/19.3.25",
-          godown: "Godown No 2",
-          destination_godown: "Godown No 2",
-          actual_qty: {
-            primary_qty: 70.0,
-            primary_unit: "pkt",
-            secondary_qty: 35.0,
-            secondary_unit: "qtl",
-            full_text: "70 pkt = 35.0 qtl"
-          }
-        },
-        {
-          batch_name: "5057/500/KAUSHAL/2.4.25",
-          godown: "Godown No 2",
-          destination_godown: "Godown No 2",
-          actual_qty: {
-            primary_qty: 100.0,
-            primary_unit: "pkt",
-            secondary_qty: 50.0,
-            secondary_unit: "qtl",
-            full_text: "100 pkt = 50.0 qtl"
-          }
-        }
-      ]
-    }
-  ],
-  created_at: "2025-07-18 10:49:45",
-  updated_at: "2025-07-18 10:49:46"
+// API query hooks
+const useStockJournals = (filters) => {
+  const queryParams = new URLSearchParams();
+  if (filters.from_date) queryParams.append("from_date", filters.from_date);
+  if (filters.to_date) queryParams.append("to_date", filters.to_date);
+  if (filters.voucher_type) queryParams.append("voucher_type", filters.voucher_type);
+  
+  const queryString = queryParams.toString();
+  const url = queryString ? `/api/get-stock-journals/?${queryString}` : "/api/get-stock-journals/";
+  
+  return useQuery({
+    queryKey: ["/api/get-stock-journals/", filters],
+    queryFn: () => apiRequest(url),
+    staleTime: 30000, // 30 seconds
+  });
+};
+
+const useVoucherTypes = () => {
+  return useQuery({
+    queryKey: ["/api/get-voucher-types/"],
+    queryFn: () => apiRequest("/api/get-voucher-types/?is_active=true"),
+    staleTime: 300000, // 5 minutes
+  });
+};
+
+const useStockJournalDetails = (transactionId) => {
+  return useQuery({
+    queryKey: ["/api/get-stock-journals-detail/", transactionId],
+    queryFn: () => apiRequest(`/api/get-stock-journals-detail/${transactionId}/`),
+    enabled: !!transactionId,
+  });
 };
 
 export default function StockJournal() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [voucherTypeFilter, setVoucherTypeFilter] = useState("all");
+  const [voucherTypeFilter, setVoucherTypeFilter] = useState("");
   const [syncFilter, setSyncFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState({ from: false, to: false });
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
 
-  // Simulate loading stock journal data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+  // Build filters object for API
+  const filters = {
+    from_date: fromDate ? formatDateForApi(fromDate) : "",
+    to_date: toDate ? formatDateForApi(toDate) : "",
+    voucher_type: voucherTypeFilter || undefined,
+  };
 
-  const filteredEntries = stockJournalData.filter(entry => {
-    const matchesSearch = entry.transaction_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.voucher_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.voucher_type_name.toLowerCase().includes(searchTerm.toLowerCase());
+  // API queries
+  const { data: stockJournalsData, isLoading: isLoadingStockJournals, error: stockJournalsError, refetch: refetchStockJournals } = useStockJournals(filters);
+  const { data: voucherTypesData, isLoading: isLoadingVoucherTypes } = useVoucherTypes();
+  const { data: detailData, isLoading: isLoadingDetail } = useStockJournalDetails(selectedTransactionId);
+
+  // Sync mutation
+  const syncMutation = useMutation({
+    mutationFn: (transactionId) => apiRequest("/api/process/sync-to-tally/", {
+      method: "POST",
+      body: JSON.stringify({ transaction_id: transactionId }),
+    }),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Transaction synced to Tally successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/get-stock-journals/"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/get-stock-journals-detail/"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sync transaction to Tally",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Filter stock journals based on search and sync status
+  const stockJournals = stockJournalsData?.data || [];
+  const filteredEntries = stockJournals.filter(entry => {
+    const matchesSearch = !searchTerm || (
+      entry.transaction_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.voucher_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.voucher_type_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     
-    const matchesVoucherType = voucherTypeFilter === "all" || entry.voucher_type_name.includes(voucherTypeFilter);
     const matchesSync = syncFilter === "all" || 
                        (syncFilter === "synced" && entry.is_tally_synced) ||
                        (syncFilter === "not_synced" && !entry.is_tally_synced);
     
-    return matchesSearch && matchesVoucherType && matchesSync;
+    return matchesSearch && matchesSync;
   });
 
-  const handleViewDetails = (entry) => {
-    setSelectedEntry({...stockJournalDetailData, ...entry});
+  const handleViewDetails = async (entry) => {
+    setSelectedTransactionId(entry.transaction_id);
+    setSelectedEntry(entry);
     setIsDetailModalOpen(true);
+  };
+
+  const handleSyncToTally = (transactionId) => {
+    syncMutation.mutate(transactionId);
+  };
+
+  const handleClearFilters = () => {
+    setFromDate(null);
+    setToDate(null);
+    setVoucherTypeFilter("");
+    setSyncFilter("all");
+    setSearchTerm("");
   };
 
   const getVoucherTypeBadge = (voucherType) => {
@@ -313,8 +183,38 @@ export default function StockJournal() {
     );
   };
 
-  if (isLoading) {
+  // Get voucher types list for dropdown
+  const voucherTypes = voucherTypesData?.data || [];
+
+  if (isLoadingStockJournals && !stockJournalsData) {
     return <Loader loadingText="Loading stock journal reports..." />;
+  }
+
+  if (stockJournalsError) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="p-8 text-center">
+            <CardContent>
+              <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Failed to load stock journal reports
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {stockJournalsError.message || "Please check your connection and try again"}
+              </p>
+              <Button onClick={() => refetchStockJournals()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -368,39 +268,130 @@ export default function StockJournal() {
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by transaction ID, voucher number, or type..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="space-y-4">
+            {/* Search and Filter Actions Row */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by transaction ID, voucher number, or type..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="whitespace-nowrap"
+                >
+                  <Filter className="h-4 w-4 mr-1" />
+                  Clear Filters
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetchStockJournals()}
+                  disabled={isLoadingStockJournals}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${isLoadingStockJournals ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={voucherTypeFilter} onValueChange={setVoucherTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Voucher Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Production">Production</SelectItem>
-                  <SelectItem value="Consumption">Consumption</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={syncFilter} onValueChange={setSyncFilter}>
-                <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Sync Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="synced">Synced</SelectItem>
-                  <SelectItem value="not_synced">Not Synced</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Filter Controls Row */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Date Range Filters */}
+              <div className="flex gap-2">
+                <Popover 
+                  open={isDatePickerOpen.from} 
+                  onOpenChange={(open) => setIsDatePickerOpen(prev => ({ ...prev, from: open }))}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-40 justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {fromDate ? formatDateForApi(fromDate) : "From Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={fromDate}
+                      onSelect={(date) => {
+                        setFromDate(date);
+                        setIsDatePickerOpen(prev => ({ ...prev, from: false }));
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Popover 
+                  open={isDatePickerOpen.to} 
+                  onOpenChange={(open) => setIsDatePickerOpen(prev => ({ ...prev, to: open }))}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-40 justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {toDate ? formatDateForApi(toDate) : "To Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={toDate}
+                      onSelect={(date) => {
+                        setToDate(date);
+                        setIsDatePickerOpen(prev => ({ ...prev, to: false }));
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Dropdown Filters */}
+              <div className="flex gap-2">
+                <Select value={voucherTypeFilter} onValueChange={setVoucherTypeFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select Voucher Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Voucher Types</SelectItem>
+                    {isLoadingVoucherTypes ? (
+                      <SelectItem value="" disabled>Loading...</SelectItem>
+                    ) : (
+                      voucherTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.name}>
+                          {type.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+
+                <Select value={syncFilter} onValueChange={setSyncFilter}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Sync Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="synced">Synced</SelectItem>
+                    <SelectItem value="not_synced">Not Synced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
@@ -508,7 +499,13 @@ export default function StockJournal() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedEntry && (
+          {isLoadingDetail && (
+            <div className="flex items-center justify-center py-8">
+              <Loader loadingText="Loading transaction details..." />
+            </div>
+          )}
+
+          {selectedEntry && !isLoadingDetail && (
             <div className="space-y-6">
               {/* Header Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-black shadow-xl">
@@ -528,6 +525,13 @@ export default function StockJournal() {
                     <span className="text-sm font-medium text-black dark:text-white">Date:</span>
                     <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.date}</span>
                   </div>
+                  {detailData?.data?.remarks && (
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium text-black dark:text-white">Remarks:</span>
+                      <span className="text-sm text-black dark:text-white font-bold">{detailData.data.remarks}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
@@ -535,27 +539,46 @@ export default function StockJournal() {
                     <span className="text-sm font-medium text-black dark:text-white">Voucher Type:</span>
                     <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.voucher_type_name}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-black dark:text-white">Destination Godown:</span>
-                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.destination_godown}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-black dark:text-white">Tally Sync:</span>
-                    {getSyncBadge(selectedEntry.is_tally_synced)}
+                  {detailData?.data?.destination_godown && (
+                    <div className="flex items-center space-x-2">
+                      <Warehouse className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium text-black dark:text-white">Destination Godown:</span>
+                      <span className="text-sm text-black dark:text-white font-bold">{detailData.data.destination_godown}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-2 justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-black dark:text-white">Tally Sync:</span>
+                      {getSyncBadge(selectedEntry.is_tally_synced)}
+                    </div>
+                    {!selectedEntry.is_tally_synced && (
+                      <Button
+                        onClick={() => handleSyncToTally(selectedEntry.transaction_id)}
+                        disabled={syncMutation.isPending}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                        size="sm"
+                      >
+                        {syncMutation.isPending ? (
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <RotateCw className="h-4 w-4 mr-2" />
+                        )}
+                        Sync Now
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Inventory Entries In */}
-              {selectedEntry.inventory_entries_in && selectedEntry.inventory_entries_in.length > 0 && (
+              {detailData?.data?.inventory_entries_in && detailData.data.inventory_entries_in.length > 0 && (
                 <div style={{animation: 'slide-in-left 0.6s ease-out forwards'}}>
                   <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-green-500 shadow-lg">
                     <ArrowRight className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries In</span>
                   </h4>
                   <div className="space-y-4">
-                    {selectedEntry.inventory_entries_in.map((entry, index) => (
+                    {detailData.data.inventory_entries_in.map((entry, index) => (
                       <Card 
                         key={index} 
                         className="bg-white dark:bg-gray-900 border-2 border-green-500 card-hover-effect transform transition-all duration-500 hover:scale-105"
@@ -572,22 +595,24 @@ export default function StockJournal() {
                                 {entry.stock_item}
                               </h5>
                               <Badge variant="outline" className="bg-white text-black border-green-500 border-2 font-bold text-lg px-3 py-1 pulse-glow">
-                                {entry.actual_qty.full_text}
+                                {entry.actual_qty?.full_text || 'N/A'}
                               </Badge>
                             </div>
-                            <div className="space-y-2">
-                              {entry.batch_allocations.map((batch, batchIndex) => (
-                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-green-500 hover:scale-105 transition-transform duration-300">
-                                  <div className="flex items-center space-x-2">
-                                    <Package className="h-4 w-4 text-green-400 animate-pulse" />
-                                    <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
-                                    <span className="text-green-500">•</span>
-                                    <span className="text-black dark:text-white">{batch.godown}</span>
+                            {entry.batch_allocations && entry.batch_allocations.length > 0 && (
+                              <div className="space-y-2">
+                                {entry.batch_allocations.map((batch, batchIndex) => (
+                                  <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-green-500 hover:scale-105 transition-transform duration-300">
+                                    <div className="flex items-center space-x-2">
+                                      <Package className="h-4 w-4 text-green-400 animate-pulse" />
+                                      <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
+                                      <span className="text-green-500">•</span>
+                                      <span className="text-black dark:text-white">{batch.godown}</span>
+                                    </div>
+                                    <span className="font-bold text-black dark:text-white">{batch.actual_qty?.full_text || 'N/A'}</span>
                                   </div>
-                                  <span className="font-bold text-black dark:text-white">{batch.actual_qty.full_text}</span>
-                                </div>
-                              ))}
-                            </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -597,14 +622,14 @@ export default function StockJournal() {
               )}
 
               {/* Inventory Entries Out */}
-              {selectedEntry.inventory_entries_out && selectedEntry.inventory_entries_out.length > 0 && (
+              {detailData?.data?.inventory_entries_out && detailData.data.inventory_entries_out.length > 0 && (
                 <div style={{animation: 'slide-in-right 0.6s ease-out forwards'}}>
                   <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-red-500 shadow-lg">
                     <ArrowLeft className="h-5 w-5 animate-bounce" />
                     <span>Inventory Entries Out</span>
                   </h4>
                   <div className="space-y-4">
-                    {selectedEntry.inventory_entries_out.map((entry, index) => (
+                    {detailData.data.inventory_entries_out.map((entry, index) => (
                       <Card 
                         key={index} 
                         className="bg-white dark:bg-gray-900 border-2 border-red-500 card-hover-effect transform transition-all duration-500 hover:scale-105"
@@ -621,22 +646,24 @@ export default function StockJournal() {
                                 {entry.stock_item}
                               </h5>
                               <Badge variant="outline" className="bg-white text-black border-red-500 border-2 font-bold text-lg px-3 py-1 pulse-glow">
-                                {entry.actual_qty.full_text}
+                                {entry.actual_qty?.full_text || 'N/A'}
                               </Badge>
                             </div>
-                            <div className="space-y-2">
-                              {entry.batch_allocations.map((batch, batchIndex) => (
-                                <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-red-500 hover:scale-105 transition-transform duration-300">
-                                  <div className="flex items-center space-x-2">
-                                    <Package className="h-4 w-4 text-red-400 animate-pulse" />
-                                    <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
-                                    <span className="text-red-500">•</span>
-                                    <span className="text-black dark:text-white">{batch.godown}</span>
+                            {entry.batch_allocations && entry.batch_allocations.length > 0 && (
+                              <div className="space-y-2">
+                                {entry.batch_allocations.map((batch, batchIndex) => (
+                                  <div key={batchIndex} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 text-black dark:text-white p-3 rounded border-2 border-red-500 hover:scale-105 transition-transform duration-300">
+                                    <div className="flex items-center space-x-2">
+                                      <Package className="h-4 w-4 text-red-400 animate-pulse" />
+                                      <span className="font-bold text-black dark:text-white">{batch.batch_name}</span>
+                                      <span className="text-red-500">•</span>
+                                      <span className="text-black dark:text-white">{batch.godown}</span>
+                                    </div>
+                                    <span className="font-bold text-black dark:text-white">{batch.actual_qty?.full_text || 'N/A'}</span>
                                   </div>
-                                  <span className="font-bold text-black dark:text-white">{batch.actual_qty.full_text}</span>
-                                </div>
-                              ))}
-                            </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>

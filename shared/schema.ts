@@ -61,8 +61,65 @@ export const insertUserSchema = createInsertSchema(users).pick({
   role: true,
 });
 
+// Stock Journal schemas
+export const stockJournalSchema = z.object({
+  transaction_id: z.string(),
+  voucher_type_name: z.string(),
+  voucher_number: z.string(),
+  remarks: z.string().optional(),
+  date: z.string(),
+  effective_date: z.string(),
+  is_tally_synced: z.boolean(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const voucherTypeSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  is_active: z.boolean(),
+  is_batch: z.boolean(),
+  add_bardan: z.boolean(),
+  in_source: z.boolean(),
+  in_destination: z.boolean(),
+  source_alias: z.string(),
+  destination_alias: z.string(),
+  parent: z.string(),
+  created_at: z.string(),
+});
+
+export const stockJournalDetailSchema = z.object({
+  transaction_id: z.string(),
+  voucher_type_name: z.string(),
+  voucher_number: z.string(),
+  remarks: z.string().optional(),
+  date: z.string(),
+  effective_date: z.string(),
+  is_tally_synced: z.boolean(),
+  destination_godown: z.string().optional(),
+  inventory_entries_in: z.array(z.any()).optional(),
+  inventory_entries_out: z.array(z.any()).optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const stockJournalFiltersSchema = z.object({
+  from_date: z.string().optional(),
+  to_date: z.string().optional(),
+  voucher_type: z.string().optional(),
+});
+
+export const syncRequestSchema = z.object({
+  transaction_id: z.string(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type DashboardData = typeof dashboardData.$inferSelect;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type StockJournal = z.infer<typeof stockJournalSchema>;
+export type VoucherType = z.infer<typeof voucherTypeSchema>;
+export type StockJournalDetail = z.infer<typeof stockJournalDetailSchema>;
+export type StockJournalFilters = z.infer<typeof stockJournalFiltersSchema>;
+export type SyncRequest = z.infer<typeof syncRequestSchema>;
