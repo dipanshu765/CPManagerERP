@@ -1,9 +1,27 @@
 import { useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { DashboardData } from "@shared/schema";
+
+interface VoucherType {
+  voucher_type_name: string;
+  total_transaction_count: number;
+  user_transaction_count: number;
+  is_batch: boolean;
+  is_bardan: boolean;
+  in_source: boolean;
+  in_destination: boolean;
+  source_alias: string;
+  destination_alias: string;
+}
+
+interface VoucherSummary {
+  voucher_types: VoucherType[];
+  total_voucher_types: number;
+  total_organization_transactions: number;
+  total_user_transactions: number;
+}
 
 interface TransactionChartProps {
-  data: DashboardData;
+  data?: VoucherSummary;
 }
 
 export default function TransactionChart({ data }: TransactionChartProps) {
@@ -12,7 +30,7 @@ export default function TransactionChart({ data }: TransactionChartProps) {
 
   useEffect(() => {
     const loadChart = async () => {
-      if (!canvasRef.current) return;
+      if (!canvasRef.current || !data || !data.voucher_types) return;
 
       // Dynamic import of Chart.js
       const { Chart, CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend } = await import('chart.js');
@@ -27,30 +45,34 @@ export default function TransactionChart({ data }: TransactionChartProps) {
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) return;
 
+      // Generate colors for each voucher type
+      const colors = [
+        'rgba(147, 51, 234, 0.8)', // Purple
+        'rgba(99, 102, 241, 0.8)', // Indigo
+        'rgba(20, 184, 166, 0.8)', // Teal
+        'rgba(249, 115, 22, 0.8)', // Orange
+        'rgba(34, 197, 94, 0.8)', // Green
+        'rgba(59, 130, 246, 0.8)', // Blue
+      ];
+
+      const borderColors = [
+        'rgba(147, 51, 234, 1)',
+        'rgba(99, 102, 241, 1)',
+        'rgba(20, 184, 166, 1)',
+        'rgba(249, 115, 22, 1)',
+        'rgba(34, 197, 94, 1)',
+        'rgba(59, 130, 246, 1)',
+      ];
+
       chartRef.current = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Consumption', 'Production', 'Brand Transfer', 'Stock Transfer'],
+          labels: data.voucher_types.map(vt => vt.voucher_type_name),
           datasets: [{
-            label: 'Transaction Count',
-            data: [
-              data.consumptionNotes,
-              data.productionNotes,
-              data.brandTransfers,
-              data.stockTransfers
-            ],
-            backgroundColor: [
-              'rgba(147, 51, 234, 0.8)', // Purple
-              'rgba(99, 102, 241, 0.8)', // Indigo
-              'rgba(20, 184, 166, 0.8)', // Teal
-              'rgba(249, 115, 22, 0.8)'  // Orange
-            ],
-            borderColor: [
-              'rgba(147, 51, 234, 1)',
-              'rgba(99, 102, 241, 1)',
-              'rgba(20, 184, 166, 1)',
-              'rgba(249, 115, 22, 1)'
-            ],
+            label: 'Total Transactions',
+            data: data.voucher_types.map(vt => vt.total_transaction_count),
+            backgroundColor: colors.slice(0, data.voucher_types.length),
+            borderColor: borderColors.slice(0, data.voucher_types.length),
             borderWidth: 2,
             borderRadius: 8,
           }]
@@ -94,7 +116,13 @@ export default function TransactionChart({ data }: TransactionChartProps) {
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Transaction Overview</h3>
         <div className="h-64">
-          <canvas ref={canvasRef} />
+          {!data || !data.voucher_types ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-gray-500">Loading chart data...</div>
+            </div>
+          ) : (
+            <canvas ref={canvasRef} />
+          )}
         </div>
       </CardContent>
     </Card>

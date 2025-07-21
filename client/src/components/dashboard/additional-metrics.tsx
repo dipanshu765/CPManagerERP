@@ -1,26 +1,47 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Coins, IndianRupee } from "lucide-react";
-import type { DashboardData } from "@shared/schema";
+
+interface HamaliSummary {
+  total_hamali_entries: number;
+  total_hamali_amount: number;
+  transfer_types: Array<{
+    transfer_type: string;
+    transfer_type_display: string;
+  }>;
+}
 
 interface AdditionalMetricsProps {
-  data: DashboardData;
+  data?: HamaliSummary;
 }
 
 export default function AdditionalMetrics({ data }: AdditionalMetricsProps) {
+  if (!data) {
+    return (
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Metrics</h3>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">Loading additional metrics...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const metrics = [
     {
-      title: "Total Voucher Types",
-      value: data.totalVoucherTypes,
+      title: "Transfer Types",
+      value: data.transfer_types.length,
       icon: FileText,
     },
     {
       title: "Hamali Entries",
-      value: data.hamaliEntries,
+      value: data.total_hamali_entries,
       icon: Coins,
     },
     {
       title: "Hamali Amount",
-      value: `₹${data.hamaliAmount.toFixed(2)}`,
+      value: `₹${data.total_hamali_amount.toFixed(2)}`,
       icon: IndianRupee,
     },
   ];

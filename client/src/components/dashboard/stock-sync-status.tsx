@@ -1,13 +1,32 @@
 import { Card, CardContent } from "@/components/ui/card";
-import type { DashboardData } from "@shared/schema";
+
+interface StockItemsSummary {
+  is_synced: boolean;
+  difference: number;
+  tally_item_count: number;
+  synced_item_count: number;
+}
 
 interface StockSyncStatusProps {
-  data: DashboardData;
+  data?: StockItemsSummary;
 }
 
 export default function StockSyncStatus({ data }: StockSyncStatusProps) {
-  const syncStatus = data.isSynced ? 'Synced' : 'Out of Sync';
-  const difference = data.tallyItemCount - data.syncedItemCount;
+  if (!data) {
+    return (
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Stock Synchronization</h3>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">Loading sync status...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const syncStatus = data.is_synced ? 'Synced' : 'Out of Sync';
+  const difference = data.difference;
 
   return (
     <Card className="shadow-sm border border-gray-200">
@@ -16,20 +35,20 @@ export default function StockSyncStatus({ data }: StockSyncStatusProps) {
         
         <div className="space-y-4">
           <div className={`flex items-center justify-between p-4 rounded-lg border ${
-            data.isSynced ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            data.is_synced ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
           }`}>
             <div className="flex items-center space-x-3">
               <div className={`w-3 h-3 rounded-full ${
-                data.isSynced ? 'bg-green-500' : 'bg-red-500'
+                data.is_synced ? 'bg-green-500' : 'bg-red-500'
               }`} />
               <span className={`font-medium ${
-                data.isSynced ? 'text-green-800' : 'text-red-800'
+                data.is_synced ? 'text-green-800' : 'text-red-800'
               }`}>
                 Sync Status
               </span>
             </div>
             <span className={`font-semibold ${
-              data.isSynced ? 'text-green-600' : 'text-red-600'
+              data.is_synced ? 'text-green-600' : 'text-red-600'
             }`}>
               {syncStatus}
             </span>
@@ -38,11 +57,11 @@ export default function StockSyncStatus({ data }: StockSyncStatusProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Tally Items</p>
-              <p className="text-2xl font-bold text-gray-900">{data.tallyItemCount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">{data.tally_item_count.toLocaleString()}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Synced Items</p>
-              <p className="text-2xl font-bold text-gray-900">{data.syncedItemCount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">{data.synced_item_count.toLocaleString()}</p>
             </div>
           </div>
           

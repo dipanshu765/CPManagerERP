@@ -1,16 +1,23 @@
 import { Card } from "@/components/ui/card";
 import { Inbox, CheckCircle, Clock, XCircle } from "lucide-react";
-import type { DashboardData } from "@shared/schema";
+
+interface InwardEntriesSummary {
+  total_count: number;
+  approved_count: number;
+  pending_count: number;
+  rejected_count: number;
+  error: null | string;
+}
 
 interface InwardEntriesMetricsProps {
-  data: DashboardData;
+  data?: InwardEntriesSummary;
 }
 
 export default function InwardEntriesMetrics({ data }: InwardEntriesMetricsProps) {
   const metrics = [
     {
       title: "Total Entries",
-      value: data.totalInwardEntries,
+      value: data?.total_count || 0,
       icon: Inbox,
       gradient: "from-blue-500 to-blue-600",
       textColor: "text-blue-100",
@@ -18,7 +25,7 @@ export default function InwardEntriesMetrics({ data }: InwardEntriesMetricsProps
     },
     {
       title: "Approved",
-      value: data.approvedEntries,
+      value: data?.approved_count || 0,
       icon: CheckCircle,
       gradient: "from-green-500 to-green-600",
       textColor: "text-green-100",
@@ -26,7 +33,7 @@ export default function InwardEntriesMetrics({ data }: InwardEntriesMetricsProps
     },
     {
       title: "Pending",
-      value: data.pendingEntries,
+      value: data?.pending_count || 0,
       icon: Clock,
       gradient: "from-yellow-500 to-yellow-600",
       textColor: "text-yellow-100",
@@ -34,7 +41,7 @@ export default function InwardEntriesMetrics({ data }: InwardEntriesMetricsProps
     },
     {
       title: "Rejected",
-      value: data.rejectedEntries,
+      value: data?.rejected_count || 0,
       icon: XCircle,
       gradient: "from-red-500 to-red-600",
       textColor: "text-red-100",

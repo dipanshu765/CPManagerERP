@@ -1,13 +1,35 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
-import type { User as UserType } from "@shared/schema";
 
-interface UserInfoCardProps {
-  user: UserType;
-  tallyRunning: boolean;
+interface UserInfo {
+  user_id: string;
+  name: string;
+  admin_id: string;
+  role_id: number;
+  role: string;
+  is_admin: boolean;
+  organization: string;
+  branch: string;
 }
 
-export default function UserInfoCard({ user, tallyRunning }: UserInfoCardProps) {
+interface UserInfoCardProps {
+  user?: UserInfo;
+  tallyRunning?: boolean;
+}
+
+export default function UserInfoCard({ user, tallyRunning = false }: UserInfoCardProps) {
+  if (!user) {
+    return (
+      <Card className="shadow-lg border-2 border-gray-200 bg-white">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">Loading user information...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden">
       {/* Animated border effects */}
@@ -49,7 +71,7 @@ export default function UserInfoCard({ user, tallyRunning }: UserInfoCardProps) 
               <div className="flex items-center space-x-2 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-lg border border-gray-200 shadow-sm">
                 <User className="w-4 h-4 text-gray-500" />
                 <span className="text-sm text-gray-600 font-mono">
-                  ID: {user.username}
+                  ID: {user.user_id}
                 </span>
               </div>
             </div>
