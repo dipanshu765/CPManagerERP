@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
+// Backend API configuration - change this to match your actual backend server
+const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://127.0.0.1:8096";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
@@ -9,10 +12,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // use storage to perform CRUD operations on the storage interface
   // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
 
-  // Mock API routes for stock journal functionality
-  // These should be replaced with actual API endpoints
-  
-  // Proxy API routes to external backend
+  // Log backend configuration on startup
+  console.log(`[Backend Configuration] Using backend URL: ${BACKEND_BASE_URL}`);
+  console.log(`[Backend Configuration] To change backend URL, set BACKEND_URL environment variable`);
+
+  // Test endpoint to check backend connectivity
+  app.get('/api/test-backend', async (req, res) => {
+    try {
+      const testUrl = `${BACKEND_BASE_URL}/`;
+      console.log(`[Backend Test] Testing connection to: ${testUrl}`);
+      
+      const response = await fetch(testUrl, {
+        method: 'GET',
+        timeout: 5000
+      });
+      
+      res.json({
+        status: 'success',
+        backend_url: BACKEND_BASE_URL,
+        backend_status: response.status,
+        backend_accessible: true,
+        message: 'Backend server is accessible'
+      });
+    } catch (error) {
+      console.error(`[Backend Test] Failed to connect to ${BACKEND_BASE_URL}:`, error);
+      res.status(503).json({
+        status: 'error',
+        backend_url: BACKEND_BASE_URL,
+        backend_accessible: false,
+        error: error.message,
+        message: 'Backend server is not accessible. Please check if your backend server is running and accessible.'
+      });
+    }
+  });
+
+  // Proxy API routes for stock journal functionality
+  // These proxy requests to your actual backend API server
   app.get('/api/get-stock-journals/', async (req, res) => {
     try {
       const authHeaders = req.headers.authorization ? { 'Authorization': req.headers.authorization } : {};
@@ -21,8 +56,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authHeaders['access_token'] = accessToken;
       }
       
-      const queryParams = new URLSearchParams(req.query);
-      const apiUrl = `http://127.0.0.1:8096/api/get-stock-journals/?${queryParams.toString()}`;
+      const queryParams = new URLSearchParams(req.query as Record<string, string>);
+      const apiUrl = `${BACKEND_BASE_URL}/api/get-stock-journals/?${queryParams.toString()}`;
+      console.log(`[Stock Journals] Attempting to fetch from: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -56,8 +92,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authHeaders['access_token'] = accessToken;
       }
       
-      const queryParams = new URLSearchParams(req.query);
-      const apiUrl = `http://127.0.0.1:8096/api/get-voucher-types/?${queryParams.toString()}`;
+      const queryParams = new URLSearchParams(req.query as Record<string, string>);
+      const apiUrl = `${BACKEND_BASE_URL}/api/get-voucher-types/?${queryParams.toString()}`;
+      console.log(`[Voucher Types] Attempting to fetch from: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -91,7 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { transactionId } = req.params;
-      const apiUrl = `http://127.0.0.1:8096/api/get-stock-journals-detail/${transactionId}/`;
+      const apiUrl = `${BACKEND_BASE_URL}/api/get-stock-journals-detail/${transactionId}/`;
+      console.log(`[Stock Journal Details] Attempting to fetch from: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -124,7 +162,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authHeaders['access_token'] = accessToken;
       }
       
-      const apiUrl = `http://127.0.0.1:8096/api/process/sync-to-tally/`;
+      const apiUrl = `${BACKEND_BASE_URL}/api/process/sync-to-tally/`;
+      console.log(`[Sync to Tally] Attempting to post to: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
