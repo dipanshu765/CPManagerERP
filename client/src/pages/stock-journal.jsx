@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { AuthService } from "@/lib/auth";
 import { 
   Menu, 
   Search, 
@@ -55,16 +55,14 @@ const useStockJournals = (filters) => {
   const url = queryString ? `/api/get-stock-journals/?${queryString}` : "/api/get-stock-journals/";
   
   return useQuery({
-    queryKey: ["/api/get-stock-journals/", filters],
-    queryFn: () => apiRequest(url),
+    queryKey: [url],
     staleTime: 30000, // 30 seconds
   });
 };
 
 const useVoucherTypes = () => {
   return useQuery({
-    queryKey: ["/api/get-voucher-types/"],
-    queryFn: () => apiRequest("/api/get-voucher-types/?is_active=true"),
+    queryKey: ["/api/get-voucher-types/", "is_active=true"],
     staleTime: 300000, // 5 minutes
   });
 };
@@ -72,7 +70,6 @@ const useVoucherTypes = () => {
 const useStockJournalDetails = (transactionId) => {
   return useQuery({
     queryKey: ["/api/get-stock-journals-detail/", transactionId],
-    queryFn: () => apiRequest(`/api/get-stock-journals-detail/${transactionId}/`),
     enabled: !!transactionId,
   });
 };
@@ -105,10 +102,25 @@ export default function StockJournal() {
 
   // Sync mutation
   const syncMutation = useMutation({
-    mutationFn: (transactionId) => apiRequest("/api/process/sync-to-tally/", {
-      method: "POST",
-      body: JSON.stringify({ transaction_id: transactionId }),
-    }),
+    mutationFn: async (transactionId) => {
+      const authHeaders = AuthService?.getAuthHeaders ? AuthService.getAuthHeaders() : {};
+      const response = await fetch("/api/process/sync-to-tally/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({ transaction_id: transactionId }),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Success",
