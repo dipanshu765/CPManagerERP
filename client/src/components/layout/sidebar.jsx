@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { sidebarMenuItems } from "@/lib/static-data";
+import { AuthService } from "@/lib/auth";
 import { 
   Gauge, 
   Users, 
@@ -44,9 +45,16 @@ export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const [isReportsOpen, setIsReportsOpen] = useState(false);
 
-  const handleNavigation = (path, name) => {
+  const handleNavigation = async (path, name) => {
     if (name === "Log out") {
-      setLocation("/login");
+      try {
+        await AuthService.logout();
+        setLocation("/login");
+      } catch (error) {
+        console.error("Logout error:", error);
+        // Still navigate to login even if logout API fails
+        setLocation("/login");
+      }
     } else if (path === "/import") {
       setLocation("/import");
     } else if (path === "/users") {

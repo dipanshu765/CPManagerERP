@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, EyeOff, Shield, Lock, User, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Shield, Lock, User, CheckCircle, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/lib/auth";
 import Loader from "../components/common/loader";
 
 export default function Login() {
@@ -22,7 +23,7 @@ export default function Login() {
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      mobile: "",
       password: "",
       rememberMe: false,
     },
@@ -44,27 +45,29 @@ export default function Login() {
     try {
       setIsLoading(true);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await AuthService.login({
+        mobile: data.mobile,
+        password: data.password,
+      });
       
-      // Static login validation
-      if (data.email === "admin@cpmanager.com" && data.password === "admin123") {
+      if (response.status === 200) {
         toast({
           title: "Login Successful",
-          description: "Welcome to CP Manager ERP",
+          description: `Welcome back, ${response.data.name}!`,
         });
         setLocation("/dashboard");
       } else {
         toast({
           title: "Login Failed",
-          description: "Invalid email or password",
+          description: response.message || "Invalid mobile number or password",
           variant: "destructive",
         });
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
-        title: "Error",
-        description: "An error occurred during login",
+        title: "Login Failed",
+        description: error.message || "Unable to connect to server. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -122,21 +125,22 @@ export default function Login() {
             
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="animate-slide-in-left">
-                <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
                   <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4" />
-                    <span>Email Address</span>
+                    <Phone className="h-4 w-4" />
+                    <span>Mobile Number</span>
                   </div>
                 </Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  {...form.register("email")}
+                  id="mobile"
+                  type="tel"
+                  placeholder="Enter your 10-digit mobile number"
+                  {...form.register("mobile")}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all transform hover:scale-105"
+                  maxLength={10}
                 />
-                {form.formState.errors.email && (
-                  <p className="text-red-500 text-sm mt-1 animate-shake">{form.formState.errors.email.message}</p>
+                {form.formState.errors.mobile && (
+                  <p className="text-red-500 text-sm mt-1 animate-shake">{form.formState.errors.mobile.message}</p>
                 )}
               </div>
               

@@ -15,7 +15,7 @@ export default function ForgotPassword() {
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: "",
+      mobile: "",
     },
   });
 
@@ -24,7 +24,7 @@ export default function ForgotPassword() {
       // Simulate forgot password functionality
       toast({
         title: "Reset Link Sent",
-        description: "Password reset instructions have been sent to your email",
+        description: "Password reset instructions have been sent to your mobile number",
       });
       setLocation("/login");
     } catch (error) {
@@ -48,23 +48,24 @@ export default function ForgotPassword() {
           <CardContent className="p-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900">Reset Password</h2>
-              <p className="text-gray-600 mt-2">Enter your email to receive reset instructions</p>
+              <p className="text-gray-600 mt-2">Enter your mobile number to receive reset instructions</p>
             </div>
             
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
+                <Label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
+                  Mobile Number
                 </Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  {...form.register("email")}
+                  id="mobile"
+                  type="tel"
+                  placeholder="Enter your 10-digit mobile number"
+                  {...form.register("mobile")}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                  maxLength={10}
                 />
-                {form.formState.errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.email.message}</p>
+                {form.formState.errors.mobile && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.mobile.message}</p>
                 )}
               </div>
               

@@ -2,13 +2,15 @@ import type { User, DashboardData } from "@shared/schema";
 
 export const mockUser: User = {
   id: 1,
-  username: "mukesh.bafna@wbagro.com",
+  userId: "USR0001",
+  mobile: "9999999999",
   password: "", // Not exposed
   name: "Mukesh Bafna",
+  roleId: 1,
   role: "Admin",
-  organization: "WB Agro Pvt. Ltd",
-  branch: "WB Agro Pvt. Ltd - Main Branch",
-  isAdmin: true,
+  accessToken: null,
+  tokenType: "Bearer",
+  lastLogin: null,
 };
 
 export const mockDashboardData: DashboardData = {

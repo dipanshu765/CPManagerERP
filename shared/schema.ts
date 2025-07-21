@@ -4,13 +4,15 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
+  userId: text("user_id").notNull().unique(),
+  mobile: text("mobile").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
+  roleId: integer("role_id").notNull(),
   role: text("role").notNull(),
-  organization: text("organization").notNull(),
-  branch: text("branch").notNull(),
-  isAdmin: boolean("is_admin").default(false),
+  accessToken: text("access_token"),
+  tokenType: text("token_type").default("Bearer"),
+  lastLogin: text("last_login"),
 });
 
 export const dashboardData = pgTable("dashboard_data", {
@@ -35,22 +37,28 @@ export const dashboardData = pgTable("dashboard_data", {
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  mobile: z.string()
+    .regex(/^\d{10}$/, "Mobile number must be exactly 10 digits")
+    .min(10, "Mobile number must be 10 digits")
+    .max(10, "Mobile number must be 10 digits"),
+  password: z.string().min(4, "Password must be at least 4 characters"),
   rememberMe: z.boolean().optional(),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  mobile: z.string()
+    .regex(/^\d{10}$/, "Mobile number must be exactly 10 digits")
+    .min(10, "Mobile number must be 10 digits")
+    .max(10, "Mobile number must be 10 digits"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
+  userId: true,
+  mobile: true,
   password: true,
   name: true,
+  roleId: true,
   role: true,
-  organization: true,
-  branch: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
