@@ -324,6 +324,160 @@ export const godownList = [
   { id: 5, name: "Quality Hold", location: "Section D" }
 ];
 
+// Stock journal entries data  
+export const stockJournalData = [
+  {
+    id: 1,
+    transaction_id: "TR000001",
+    voucher_number: "SJ001/2025",
+    voucher_type_name: "Sj Production [R]",
+    date: "21-07-2025",
+    reference: "PROD-REF-001",
+    description: "Raw material to finished product conversion",
+    total_items: 5,
+    total_quantity: 1250.00,
+    is_tally_synced: true,
+    created_at: "21-07-2025 10:30:00",
+    updated_at: "21-07-2025 11:00:00"
+  },
+  {
+    id: 2,
+    transaction_id: "TR000002",
+    voucher_number: "SJ002/2025",
+    voucher_type_name: "Sj Consumption [R]",
+    date: "21-07-2025",
+    reference: "CONS-REF-002",
+    description: "Raw material consumption for production",
+    total_items: 3,
+    total_quantity: 850.00,
+    is_tally_synced: false,
+    created_at: "21-07-2025 09:15:00",
+    updated_at: "21-07-2025 09:15:00"
+  },
+  {
+    id: 3,
+    transaction_id: "TR000003",
+    voucher_number: "SJ003/2025",
+    voucher_type_name: "Sj Brand Transfer",
+    date: "20-07-2025",
+    reference: "BT-REF-003",
+    description: "Brand transfer between locations",
+    total_items: 2,
+    total_quantity: 500.00,
+    is_tally_synced: true,
+    created_at: "20-07-2025 16:45:00",
+    updated_at: "20-07-2025 17:00:00"
+  },
+  {
+    id: 4,
+    transaction_id: "TR000004",
+    voucher_number: "SJ004/2025",
+    voucher_type_name: "Sj Stock Transfer",
+    date: "20-07-2025",
+    reference: "ST-REF-004",
+    description: "Stock transfer to warehouse",
+    total_items: 4,
+    total_quantity: 920.00,
+    is_tally_synced: false,
+    created_at: "20-07-2025 14:20:00",
+    updated_at: "20-07-2025 14:20:00"
+  },
+  {
+    id: 5,
+    transaction_id: "TR000005",
+    voucher_number: "SJ005/2025",
+    voucher_type_name: "Sj Production [R]",
+    date: "19-07-2025",
+    reference: "PROD-REF-005",
+    description: "Bulk production processing",
+    total_items: 8,
+    total_quantity: 2100.00,
+    is_tally_synced: true,
+    created_at: "19-07-2025 11:30:00",
+    updated_at: "19-07-2025 12:00:00"
+  },
+  {
+    id: 6,
+    transaction_id: "TR000006",
+    voucher_number: "SJ006/2025",
+    voucher_type_name: "Sj Consumption [R]",
+    date: "19-07-2025",
+    reference: "CONS-REF-006",
+    description: "Quality testing material consumption",
+    total_items: 1,
+    total_quantity: 150.00,
+    is_tally_synced: false,
+    created_at: "19-07-2025 10:00:00",
+    updated_at: "19-07-2025 10:00:00"
+  }
+];
+
+// Stock journal detail data
+export const stockJournalDetailData = {
+  TR000001: {
+    id: 1,
+    transaction_id: "TR000001",
+    voucher_number: "SJ001/2025",
+    voucher_type_name: "Sj Production [R]",
+    date: "21-07-2025",
+    reference: "PROD-REF-001",
+    description: "Raw material to finished product conversion",
+    total_items: 5,
+    total_quantity: 1250.00,
+    is_tally_synced: true,
+    items: [
+      {
+        id: 1,
+        item_name: "Rice Flour Grade A",
+        quantity_in: 0,
+        quantity_out: 500.00,
+        unit: "KG",
+        rate: 45.00,
+        amount: 22500.00
+      },
+      {
+        id: 2,
+        item_name: "Wheat Flour Premium",
+        quantity_in: 750.00,
+        quantity_out: 0,
+        unit: "KG", 
+        rate: 38.50,
+        amount: 28875.00
+      }
+    ],
+    created_at: "21-07-2025 10:30:00",
+    updated_at: "21-07-2025 11:00:00"
+  }
+};
+
+// Available voucher types for stock journals
+export const stockVoucherTypes = [
+  {
+    id: 1,
+    name: "Sj Production [R]",
+    description: "Production voucher for raw materials",
+    is_active: true
+  },
+  {
+    id: 2,
+    name: "Sj Consumption [R]",
+    description: "Consumption voucher for raw materials", 
+    is_active: true
+  },
+  {
+    id: 3,
+    name: "Sj Brand Transfer",
+    description: "Brand transfer between locations",
+    is_active: true
+  },
+  {
+    id: 4,
+    name: "Sj Stock Transfer",
+    description: "Stock transfer voucher",
+    is_active: true
+  }
+];
+
 export const sidebarMenuItems = [
   { name: "Dashboard", icon: "gauge", path: "/dashboard", active: true },
   { name: "User List", icon: "users", path: "/users", active: false },

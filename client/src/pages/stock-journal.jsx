@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
@@ -14,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
-import { AuthService } from "@/lib/auth";
 import { 
   Menu, 
   Search, 
@@ -36,41 +34,37 @@ import {
   RefreshCw
 } from "lucide-react";
 import Loader from "@/components/common/loader";
+import { stockJournalData, stockJournalDetailData, stockVoucherTypes } from "@/lib/static-data";
 // Note: Type imports are commented out since this is a JSX file
 // import { StockJournal, VoucherType, StockJournalDetail, StockJournalFilters } from "@shared/schema";
 
-// Helper function to format date for API
+// Helper function to format date for display
 const formatDateForApi = (date) => {
   return date ? format(new Date(date), "dd-MM-yyyy") : "";
 };
 
-// API query hooks
-const useStockJournals = (filters) => {
-  const queryParams = new URLSearchParams();
-  if (filters.from_date) queryParams.append("from_date", filters.from_date);
-  if (filters.to_date) queryParams.append("to_date", filters.to_date);
-  if (filters.voucher_type) queryParams.append("voucher_type", filters.voucher_type);
-  
-  const queryString = queryParams.toString();
-  const url = queryString ? `/api/get-stock-journals/?${queryString}` : "/api/get-stock-journals/";
-  
-  return useQuery({
-    queryKey: [url],
-    staleTime: 30000, // 30 seconds
-  });
-};
-
-const useVoucherTypes = () => {
-  return useQuery({
-    queryKey: ["/api/get-voucher-types/", "is_active=true"],
-    staleTime: 300000, // 5 minutes
-  });
-};
-
-const useStockJournalDetails = (transactionId) => {
-  return useQuery({
-    queryKey: ["/api/get-stock-journals-detail/", transactionId],
-    enabled: !!transactionId,
+// Helper function to filter stock journals based on criteria
+const filterStockJournals = (data, filters) => {
+  return data.filter(entry => {
+    // Date filtering
+    if (filters.from_date) {
+      const entryDate = new Date(entry.date.split('-').reverse().join('-'));
+      const fromDate = new Date(filters.from_date.split('-').reverse().join('-'));
+      if (entryDate < fromDate) return false;
+    }
+    
+    if (filters.to_date) {
+      const entryDate = new Date(entry.date.split('-').reverse().join('-'));
+      const toDate = new Date(filters.to_date.split('-').reverse().join('-'));
+      if (entryDate > toDate) return false;
+    }
+    
+    // Voucher type filtering
+    if (filters.voucher_type && filters.voucher_type !== "all") {
+      if (entry.voucher_type_name !== filters.voucher_type) return false;
+    }
+    
+    return true;
   });
 };
 
@@ -85,58 +79,36 @@ export default function StockJournal() {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState({ from: false, to: false });
+  const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
 
-  // Build filters object for API
+  // Build filters object
   const filters = {
     from_date: fromDate ? formatDateForApi(fromDate) : "",
     to_date: toDate ? formatDateForApi(toDate) : "",
     voucher_type: voucherTypeFilter || undefined,
   };
 
-  // API queries
-  const { data: stockJournalsData, isLoading: isLoadingStockJournals, error: stockJournalsError, refetch: refetchStockJournals } = useStockJournals(filters);
-  const { data: voucherTypesData, isLoading: isLoadingVoucherTypes } = useVoucherTypes();
-  const { data: detailData, isLoading: isLoadingDetail } = useStockJournalDetails(selectedTransactionId);
+  // Get filtered data from static sources
+  const stockJournalsData = { data: filterStockJournals(stockJournalData, filters) };
+  const voucherTypesData = { data: stockVoucherTypes };
+  const detailData = selectedTransactionId ? stockJournalDetailData[selectedTransactionId] : null;
 
-  // Sync mutation
-  const syncMutation = useMutation({
-    mutationFn: async (transactionId) => {
-      const authHeaders = AuthService?.getAuthHeaders ? AuthService.getAuthHeaders() : {};
-      const response = await fetch("/api/process/sync-to-tally/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-        body: JSON.stringify({ transaction_id: transactionId }),
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `HTTP error! status: ${response.status}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Transaction synced to Tally successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/get-stock-journals/"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/get-stock-journals-detail/"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sync transaction to Tally",
-        variant: "destructive",
-      });
-    },
-  });
+  // Sync function (simulated for demo)
+  const handleSyncTransaction = async (transactionId) => {
+    setIsLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // For demo purposes, just show success message
+    toast({
+      title: "Success",
+      description: "Transaction synced to Tally successfully",
+    });
+    
+    setIsLoading(false);
+  };
 
   // Filter stock journals based on search, voucher type, and sync status
   const stockJournals = stockJournalsData?.data || [];
@@ -163,7 +135,7 @@ export default function StockJournal() {
   };
 
   const handleSyncToTally = (transactionId) => {
-    syncMutation.mutate(transactionId);
+    handleSyncTransaction(transactionId);
   };
 
   const handleClearFilters = () => {
@@ -200,45 +172,8 @@ export default function StockJournal() {
   // Get voucher types list for dropdown
   const voucherTypes = voucherTypesData?.data || [];
 
-  if (isLoadingStockJournals && !stockJournalsData) {
+  if (isLoading) {
     return <Loader loadingText="Loading stock journal reports..." />;
-  }
-
-  if (stockJournalsError) {
-    const isBackendUnavailable = stockJournalsError.message?.includes('503') || stockJournalsError.message?.includes('Backend API server not available');
-    
-    return (
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="hidden md:block">
-          <Sidebar />
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md mx-4">
-            <CardContent>
-              <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {isBackendUnavailable ? 'Backend API Server Required' : 'Failed to load stock journal reports'}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {isBackendUnavailable ? (
-                  <>
-                    Please start your backend API server on <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">http://127.0.0.1:8096</code> to load stock journal data.
-                    <br /><br />
-                    The frontend is ready and will automatically connect once your API server is running.
-                  </>
-                ) : (
-                  stockJournalsError.message || "Please check your connection and try again"
-                )}
-              </p>
-              <Button onClick={() => refetchStockJournals()}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {isBackendUnavailable ? 'Check Again' : 'Retry'}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -319,10 +254,10 @@ export default function StockJournal() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => refetchStockJournals()}
-                  disabled={isLoadingStockJournals}
+                  onClick={() => window.location.reload()}
+                  disabled={isLoading}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-1 ${isLoadingStockJournals ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
               </div>
@@ -393,15 +328,11 @@ export default function StockJournal() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Voucher Types</SelectItem>
-                    {isLoadingVoucherTypes ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : (
-                      voucherTypes.map((type) => (
+                    {voucherTypes.map((type) => (
                         <SelectItem key={type.id} value={type.name}>
                           {type.name}
                         </SelectItem>
-                      ))
-                    )}
+                      ))}
                   </SelectContent>
                 </Select>
 
@@ -523,13 +454,7 @@ export default function StockJournal() {
             </DialogDescription>
           </DialogHeader>
           
-          {isLoadingDetail && (
-            <div className="flex items-center justify-center py-8">
-              <Loader loadingText="Loading transaction details..." />
-            </div>
-          )}
-
-          {selectedEntry && !isLoadingDetail && (
+          {selectedEntry && (
             <div className="space-y-6">
               {/* Header Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-black shadow-xl">
