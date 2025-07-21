@@ -34,7 +34,7 @@ import { AuthService } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import Loader from "@/components/common/loader";
 
-const API_BASE_URL = "http://192.168.1.118:8095";
+const API_BASE_URL = "http://127.0.0.1:8096";
 
 // Form validation schema
 const jaliDetailSchema = z.object({
