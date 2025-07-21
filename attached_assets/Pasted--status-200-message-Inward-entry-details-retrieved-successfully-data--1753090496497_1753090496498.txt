@@ -1,0 +1,85 @@
+{
+    "status": 200,
+    "message": "Inward entry details retrieved successfully",
+    "data": {
+        "id": 26,
+        "sl_no": "IW/2025/0005",
+        "date": "21-07-2025",
+        "party": "XYZ Grains Ltd.",
+        "broker": "Naveen",
+        "vehicle_no": "UP32AU1011",
+        "bill_no": "SL4755",
+        "loading_at": "",
+        "unloading_at": "",
+        "gross_weight": "1000.00",
+        "tare_weight": "100.00",
+        "net_weight": "900.00",
+        "tested_by": "Mukesh Bafna",
+        "test_date": "21-07-2025 13:58:40",
+        "status": "pending",
+        "total_items": 1,
+        "total_bags": 10,
+        "total_weight": "1000.00",
+        "status_summary": {
+            "approved_items": 0,
+            "rejected_items": 0,
+            "pending_items": 1
+        },
+        "stock_items": [
+            {
+                "id": 20,
+                "item_name": "Gram Bags Interfirm [100 Kg]",
+                "quality_name": "Average",
+                "brand": "Binmark",
+                "our_brand": "President",
+                "unit": "bags",
+                "number_of_bags": 10,
+                "total_weight": "1000.00",
+                "testing_parameters": {
+                    "moisture": "11.20",
+                    "foreign_matter": null,
+                    "damaged_broken_grains": "1.00",
+                    "discoloured_grains": "4.70",
+                    "weevilled_grains": null,
+                    "immature_grains": null,
+                    "contrasting": null,
+                    "chalky_grains": null,
+                    "red_striated_grains": null,
+                    "yellow_grains": null,
+                    "paddy_grains": null,
+                    "average_length": null
+                },
+                "godown_location": null,
+                "supervisor": null,
+                "lot_number": "",
+                "remarks": "Average",
+                "status": "pending",
+                "tested_by": "Mukesh Bafna",
+                "tested_date": "21-07-2025 13:58:40",
+                "approved_by": null,
+                "approved_date": null,
+                "rejection_reason": "",
+                "jali_details": [
+                    {
+                        "id": 39,
+                        "jali_number": "4.5",
+                        "weight_type": "up",
+                        "weight_value": "800.00",
+                        "bags_count": 8,
+                        "remarks": "up"
+                    },
+                    {
+                        "id": 40,
+                        "jali_number": "3.5",
+                        "weight_type": "down",
+                        "weight_value": "200.00",
+                        "bags_count": 2,
+                        "remarks": "down"
+                    }
+                ]
+            }
+        ],
+        "created_at": "21-07-2025 13:58:40",
+        "updated_at": "21-07-2025 13:58:40"
+    }
+}
