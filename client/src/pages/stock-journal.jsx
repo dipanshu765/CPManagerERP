@@ -80,7 +80,7 @@ export default function StockJournal() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [voucherTypeFilter, setVoucherTypeFilter] = useState("");
+  const [voucherTypeFilter, setVoucherTypeFilter] = useState("all");
   const [syncFilter, setSyncFilter] = useState("all");
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -138,7 +138,7 @@ export default function StockJournal() {
     },
   });
 
-  // Filter stock journals based on search and sync status
+  // Filter stock journals based on search, voucher type, and sync status
   const stockJournals = stockJournalsData?.data || [];
   const filteredEntries = stockJournals.filter(entry => {
     const matchesSearch = !searchTerm || (
@@ -147,11 +147,13 @@ export default function StockJournal() {
       entry.voucher_type_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
+    const matchesVoucherType = voucherTypeFilter === "all" || entry.voucher_type_name === voucherTypeFilter;
+    
     const matchesSync = syncFilter === "all" || 
                        (syncFilter === "synced" && entry.is_tally_synced) ||
                        (syncFilter === "not_synced" && !entry.is_tally_synced);
     
-    return matchesSearch && matchesSync;
+    return matchesSearch && matchesVoucherType && matchesSync;
   });
 
   const handleViewDetails = async (entry) => {
@@ -167,7 +169,7 @@ export default function StockJournal() {
   const handleClearFilters = () => {
     setFromDate(null);
     setToDate(null);
-    setVoucherTypeFilter("");
+    setVoucherTypeFilter("all");
     setSyncFilter("all");
     setSearchTerm("");
   };
@@ -380,9 +382,9 @@ export default function StockJournal() {
                     <SelectValue placeholder="Select Voucher Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Voucher Types</SelectItem>
+                    <SelectItem value="all">All Voucher Types</SelectItem>
                     {isLoadingVoucherTypes ? (
-                      <SelectItem value="" disabled>Loading...</SelectItem>
+                      <SelectItem value="loading" disabled>Loading...</SelectItem>
                     ) : (
                       voucherTypes.map((type) => (
                         <SelectItem key={type.id} value={type.name}>
