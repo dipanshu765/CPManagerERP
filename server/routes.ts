@@ -12,127 +12,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mock API routes for stock journal functionality
   // These should be replaced with actual API endpoints
   
-  app.get('/api/get-stock-journals/', (req, res) => {
-    // Mock data matching the API response format
-    const mockData = {
-      status: 200,
-      data: [
-        {
-          transaction_id: "TR000029",
-          voucher_type_name: "Sj Production [T]",
-          voucher_number: "MUK014",
-          remarks: "added",
-          date: "21-07-2025",
-          effective_date: "21-07-2025",
-          is_tally_synced: true,
-          created_at: "2025-07-21 11:58:48",
-          updated_at: "2025-07-21 11:58:48"
-        },
-        {
-          transaction_id: "TR000028",
-          voucher_type_name: "Sj Production [T]",
-          voucher_number: "MUK013",
-          remarks: "production entry added",
-          date: "21-07-2025",
-          effective_date: "21-07-2025",
-          is_tally_synced: false,
-          created_at: "2025-07-21 11:51:55",
-          updated_at: "2025-07-21 11:51:56"
-        }
-      ]
-    };
-    res.json(mockData);
-  });
-
-  app.get('/api/get-voucher-types/', (req, res) => {
-    const mockData = {
-      status: 200,
-      data: [
-        {
-          id: 95,
-          name: "Sj Consumption [R]",
-          is_active: true,
-          is_batch: false,
-          add_bardan: true,
-          in_source: false,
-          in_destination: true,
-          source_alias: "Raw Item",
-          destination_alias: "Process Item",
-          parent: "Stock Journal",
-          created_at: "2025-07-16T10:51:09.740690"
-        },
-        {
-          id: 99,
-          name: "Sj Production [T]",
-          is_active: true,
-          is_batch: true,
-          add_bardan: true,
-          in_source: true,
-          in_destination: false,
-          source_alias: "Process Item",
-          destination_alias: "Final Item",
-          parent: "Stock Journal",
-          created_at: "2025-07-16T10:51:09.873065"
-        }
-      ]
-    };
-    res.json(mockData);
-  });
-
-  app.get('/api/get-stock-journals-detail/:transactionId', (req, res) => {
-    const mockData = {
-      status: 200,
-      data: {
-        transaction_id: req.params.transactionId,
-        voucher_type_name: "Sj Production [T]",
-        voucher_number: "MUK014",
-        remarks: "Production entry with detailed inventory",
-        date: "21-07-2025",
-        effective_date: "21-07-2025",
-        is_tally_synced: true,
-        destination_godown: "Godown No 1",
-        inventory_entries_in: [
-          {
-            stock_item: "Process Gramdall Loose Rayapur [15.1.24]",
-            actual_qty: {
-              primary_qty: 250.0,
-              primary_unit: "bags",
-              secondary_qty: 250.0,
-              secondary_unit: "qtl",
-              full_text: "250.00 bags = 250.00 qtl"
-            },
-            batch_allocations: [
-              {
-                batch_name: "Primary",
-                godown: "Godown No 1",
-                destination_godown: "Godown No 1",
-                actual_qty: {
-                  primary_qty: 250.0,
-                  primary_unit: "bags",
-                  secondary_qty: 250.0,
-                  secondary_unit: "qtl",
-                  full_text: "250 bags = 250.0 qtl"
-                }
-              }
-            ]
-          }
-        ],
-        inventory_entries_out: [],
-        created_at: "2025-07-21 11:58:48",
-        updated_at: "2025-07-21 11:58:48"
+  // Proxy API routes to external backend
+  app.get('/api/get-stock-journals/', async (req, res) => {
+    try {
+      const authHeaders = req.headers.authorization ? { 'Authorization': req.headers.authorization } : {};
+      const accessToken = req.headers.access_token;
+      if (accessToken) {
+        authHeaders['access_token'] = accessToken;
       }
-    };
-    res.json(mockData);
+      
+      const queryParams = new URLSearchParams(req.query);
+      const apiUrl = `http://127.0.0.1:8096/api/get-stock-journals/?${queryParams.toString()}`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Failed to fetch stock journals' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error proxying stock journals request:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
-  app.post('/api/process/sync-to-tally/', (req, res) => {
-    // Mock sync response
-    const { transaction_id } = req.body;
-    res.json({
-      status: 200,
-      message: `Transaction ${transaction_id} synced to Tally successfully`,
-      data: { transaction_id, synced_at: new Date().toISOString() }
-    });
+  app.get('/api/get-voucher-types/', async (req, res) => {
+    try {
+      const authHeaders = req.headers.authorization ? { 'Authorization': req.headers.authorization } : {};
+      const accessToken = req.headers.access_token;
+      if (accessToken) {
+        authHeaders['access_token'] = accessToken;
+      }
+      
+      const queryParams = new URLSearchParams(req.query);
+      const apiUrl = `http://127.0.0.1:8096/api/get-voucher-types/?${queryParams.toString()}`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Failed to fetch voucher types' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error proxying voucher types request:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/api/get-stock-journals-detail/:transactionId', async (req, res) => {
+    try {
+      const authHeaders = req.headers.authorization ? { 'Authorization': req.headers.authorization } : {};
+      const accessToken = req.headers.access_token;
+      if (accessToken) {
+        authHeaders['access_token'] = accessToken;
+      }
+      
+      const { transactionId } = req.params;
+      const apiUrl = `http://127.0.0.1:8096/api/get-stock-journals-detail/${transactionId}/`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Failed to fetch stock journal details' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error proxying stock journal details request:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/process/sync-to-tally/', async (req, res) => {
+    try {
+      const authHeaders = req.headers.authorization ? { 'Authorization': req.headers.authorization } : {};
+      const accessToken = req.headers.access_token;
+      if (accessToken) {
+        authHeaders['access_token'] = accessToken;
+      }
+      
+      const apiUrl = `http://127.0.0.1:8096/api/process/sync-to-tally/`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
+        body: JSON.stringify(req.body)
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Failed to sync to Tally' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error proxying sync to Tally request:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   const httpServer = createServer(app);
