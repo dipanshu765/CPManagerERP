@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -26,62 +30,153 @@ import {
   X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 import Loader from "@/components/common/loader";
 
-// Static data for dropdowns based on your JSON structure
-const partyOptions = [
-  { id: 1, name: "ABC Agro Limited" },
-  { id: 2, name: "XYZ Trading Company" },
-  { id: 3, name: "Global Imports Ltd" },
-  { id: 4, name: "Local Suppliers Co" },
-  { id: 5, name: "Premium Goods Inc" }
-];
+const API_BASE_URL = "http://127.0.0.1:8096";
 
-const brokerOptions = [
-  { id: 1, name: "Naveen" },
-  { id: 2, name: "Rakesh" },
-  { id: 3, name: "Suresh" },
-  { id: 4, name: "Mahesh" },
-  { id: 5, name: "Dinesh" }
-];
+// Form validation schema
+const jaliDetailSchema = z.object({
+  jali_number: z.string().min(1, "Jali number is required"),
+  weight_type: z.enum(["up", "down"]),
+  weight_value: z.string().min(1, "Weight value is required"),
+  bags_count: z.number().min(1, "Bags count must be at least 1"),
+  remarks: z.string().optional(),
+});
 
-const stockItemOptions = [
-  { id: 4496, name: "Raw Turdal Patka [Wb Gold] New [50kg]" },
-  { id: 4497, name: "Process Gramdall Loose Rayapur [15.1.24]" },
-  { id: 4498, name: "Bardan Reject" },
-  { id: 4499, name: "Premium Rice Grade A [25kg]" },
-  { id: 4500, name: "Standard Wheat [40kg]" }
-];
+const itemSchema = z.object({
+  item_id: z.number().min(1, "Stock item is required"),
+  quality_id: z.number().min(1, "Quality is required"),
+  brand: z.string().min(1, "Brand is required"),
+  our_brand: z.string().min(1, "Our brand is required"),
+  number_of_bags: z.number().min(1, "Number of bags is required"),
+  total_weight: z.string().min(1, "Total weight is required"),
+  moisture: z.string().min(1, "Moisture is required"),
+  damaged_broken_grains: z.string().min(1, "Damaged/broken grains is required"),
+  discoloured_grains: z.string().min(1, "Discoloured grains is required"),
+  remarks: z.string().optional(),
+  jali_details: z.array(jaliDetailSchema).min(1, "At least one jali detail is required"),
+});
 
-const qualityOptions = [
-  { id: 1, name: "Grade A" },
-  { id: 2, name: "Grade B" },
-  { id: 3, name: "Grade C" },
-  { id: 4, name: "Premium" },
-  { id: 5, name: "Standard" }
-];
+const addInwardSchema = z.object({
+  party_id: z.number().min(1, "Party is required"),
+  vehicle_no: z.string().min(1, "Vehicle number is required"),
+  bill_no: z.string().min(1, "Bill number is required"),
+  broker_id: z.number().min(1, "Broker is required"),
+  gross_weight: z.string().min(1, "Gross weight is required"),
+  tare_weight: z.string().min(1, "Tare weight is required"),
+  items: z.array(itemSchema).min(1, "At least one item is required"),
+});
 
 export default function AddInward() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Form state based on JSON structure
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0], // Current date
-    party_name: "",
-    vehicle_no: "",
-    bill_no: "",
-    broker_name: "",
-    gross_weight: "",
-    tare_weight: "",
-    net_weight: "",
-    items: []
+  const form = useForm({
+    resolver: zodResolver(addInwardSchema),
+    defaultValues: {
+      party_id: 0,
+      vehicle_no: "",
+      bill_no: "",
+      broker_id: 0,
+      gross_weight: "",
+      tare_weight: "",
+      items: [{
+        item_id: 0,
+        quality_id: 0,
+        brand: "",
+        our_brand: "",
+        number_of_bags: 1,
+        total_weight: "",
+        moisture: "",
+        damaged_broken_grains: "",
+        discoloured_grains: "",
+        remarks: "",
+        jali_details: [{
+          jali_number: "",
+          weight_type: "up",
+          weight_value: "",
+          bags_count: 1,
+          remarks: "",
+        }]
+      }]
+    },
   });
 
-  // Simulate loading
+  const { fields: itemFields, append: appendItem, remove: removeItem } = useFieldArray({
+    control: form.control,
+    name: "items"
+  });
+
+  // Fetch parties
+  const { data: parties = [], isLoading: partiesLoading } = useQuery({
+    queryKey: [`${API_BASE_URL}/api/report/party/`],
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // Fetch brokers
+  const { data: brokers = [], isLoading: brokersLoading } = useQuery({
+    queryKey: [`${API_BASE_URL}/api/report/broker/`],
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // Fetch quality types
+  const { data: qualityTypes = [], isLoading: qualityLoading } = useQuery({
+    queryKey: [`${API_BASE_URL}/api/process/get-quality-types/`],
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // Fetch stock items
+  const { data: stockItems = [], isLoading: stockItemsLoading } = useQuery({
+    queryKey: [`${API_BASE_URL}/api/get-stock-items/`],
+    queryFn: async () => {
+      const response = await apiRequest('POST', `${API_BASE_URL}/api/get-stock-items/`, {
+        search: "",
+        type: "",
+        stock_group: "",
+        godown: ""
+      });
+      const data = await response.json();
+      return data.data || [];
+    },
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // Submit mutation
+  const submitMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await apiRequest('POST', `${API_BASE_URL}/api/report/add-inventory/`, data);
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.status === 201) {
+        toast({
+          title: "Success",
+          description: "Inward entry created successfully",
+        });
+        form.reset();
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to create inward entry",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Submit error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create inward entry",
+        variant: "destructive",
+      });
+    },
+  });
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -90,503 +185,495 @@ export default function AddInward() {
   }, []);
 
   const addNewItem = () => {
-    const newItem = {
-      id: Date.now(),
-      stock_item: "",
-      quality: "",
+    appendItem({
+      item_id: 0,
+      quality_id: 0,
       brand: "",
       our_brand: "",
-      number_of_bags: "",
+      number_of_bags: 1,
       total_weight: "",
       moisture: "",
       damaged_broken_grains: "",
       discoloured_grains: "",
-      remarks: ""
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, newItem]
-    }));
+      remarks: "",
+      jali_details: [{
+        jali_number: "",
+        weight_type: "up",
+        weight_value: "",
+        bags_count: 1,
+        remarks: "",
+      }]
+    });
   };
 
-  const removeItem = (itemId) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter(item => item.id !== itemId)
-    }));
+  const addJaliDetail = (itemIndex) => {
+    const currentJaliDetails = form.getValues(`items.${itemIndex}.jali_details`) || [];
+    form.setValue(`items.${itemIndex}.jali_details`, [
+      ...currentJaliDetails,
+      {
+        jali_number: "",
+        weight_type: "up",
+        weight_value: "",
+        bags_count: 1,
+        remarks: "",
+      }
+    ]);
   };
 
-  const updateItem = (itemId, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => 
-        item.id === itemId ? { ...item, [field]: value } : item
-      )
-    }));
+  const removeJaliDetail = (itemIndex, jaliIndex) => {
+    const currentJaliDetails = form.getValues(`items.${itemIndex}.jali_details`) || [];
+    if (currentJaliDetails.length > 1) {
+      const updatedJaliDetails = currentJaliDetails.filter((_, index) => index !== jaliIndex);
+      form.setValue(`items.${itemIndex}.jali_details`, updatedJaliDetails);
+    }
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data) => {
     try {
-      setIsSaving(true);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Success",
-        description: "Inward entry saved successfully",
-      });
-      
-      // Reset form
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        party_name: "",
-        vehicle_no: "",
-        bill_no: "",
-        broker_name: "",
-        gross_weight: "",
-        tare_weight: "",
-        net_weight: "",
-        items: []
-      });
-      
+      await submitMutation.mutateAsync(data);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save inward entry",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+      console.error("Form submission error:", error);
     }
   };
 
   if (isLoading) {
-    return <Loader loadingText="Loading add inward form..." />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar */}
-      <div className="hidden md:block">
-        <Sidebar />
-      </div>
-
-      {/* Mobile Sidebar */}
-      <MobileSidebar 
-        isOpen={isMobileSidebarOpen} 
-        onClose={() => setIsMobileSidebarOpen(false)} 
-      />
-
-      {/* Main Content */}
+    <div className="flex h-screen overflow-hidden">
+      {!isMobile && <Sidebar />}
+      <MobileSidebar isOpen={isMobileSidebarOpen} onClose={() => setIsMobileSidebarOpen(false)} />
+      
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="md:hidden"
-                  onClick={() => setIsMobileSidebarOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-                <div className="flex items-center space-x-2">
-                  <Plus className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                  <div>
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Add Inward Entry
-                    </h1>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Create new inward stock entry
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white border-2 border-black transition-all duration-300"
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Entry"}
-                </Button>
-              </div>
+        <div className="flex items-center justify-between p-4 border-b bg-white">
+          <div className="flex items-center space-x-4">
+            {isMobile && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMobileSidebarOpen(true)}
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Add Inward Entry</h1>
+              <p className="text-gray-600">Create new inward inventory entry</p>
             </div>
           </div>
-        </header>
+          <Badge variant="outline" className="text-sm">
+            <Calendar className="h-4 w-4 mr-1" />
+            {new Date().toLocaleDateString()}
+          </Badge>
+        </div>
 
-        {/* Main Form Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-6xl mx-auto space-y-6">
-            
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto p-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
-            <Card className="border-2 border-gray-200 dark:border-gray-700 hover:border-black dark:hover:border-white transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-black to-gray-800 text-white">
+            <Card>
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <FileText className="h-5 w-5" />
                   <span>Basic Information</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  
-                  {/* Date */}
-                  <div className="space-y-2">
-                    <Label htmlFor="date" className="text-sm font-medium flex items-center space-x-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>Date</span>
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData(prev => ({...prev, date: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="party_id">Party</Label>
+                    <Controller
+                      name="party_id"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value?.toString()}
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select party" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {partiesLoading ? (
+                              <SelectItem value="loading" disabled>Loading...</SelectItem>
+                            ) : (
+                              parties.map((party) => (
+                                <SelectItem key={party.id} value={party.id.toString()}>
+                                  {party.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
+                    {form.formState.errors.party_id && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.party_id.message}</p>
+                    )}
                   </div>
 
-                  {/* Party Selection */}
-                  <div className="space-y-2">
-                    <Label htmlFor="party" className="text-sm font-medium flex items-center space-x-1">
-                      <Users className="h-4 w-4" />
-                      <span>Party</span>
-                    </Label>
-                    <Select value={formData.party_name} onValueChange={(value) => setFormData(prev => ({...prev, party_name: value}))}>
-                      <SelectTrigger className="border-2 border-gray-300 focus:border-black">
-                        <SelectValue placeholder="Select party" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {partyOptions.map(party => (
-                          <SelectItem key={party.id} value={party.name}>
-                            {party.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div>
+                    <Label htmlFor="broker_id">Broker</Label>
+                    <Controller
+                      name="broker_id"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value?.toString()}
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select broker" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {brokersLoading ? (
+                              <SelectItem value="loading" disabled>Loading...</SelectItem>
+                            ) : (
+                              brokers.map((broker) => (
+                                <SelectItem key={broker.id} value={broker.id.toString()}>
+                                  {broker.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {form.formState.errors.broker_id && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.broker_id.message}</p>
+                    )}
                   </div>
 
-                  {/* Vehicle Number */}
-                  <div className="space-y-2">
-                    <Label htmlFor="vehicle_no" className="text-sm font-medium flex items-center space-x-1">
-                      <Truck className="h-4 w-4" />
-                      <span>Vehicle Number</span>
-                    </Label>
+                  <div>
+                    <Label htmlFor="vehicle_no">Vehicle Number</Label>
                     <Input
                       id="vehicle_no"
-                      placeholder="KA25 U 2832"
-                      value={formData.vehicle_no}
-                      onChange={(e) => setFormData(prev => ({...prev, vehicle_no: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
+                      placeholder="Enter vehicle number"
+                      {...form.register("vehicle_no")}
                     />
+                    {form.formState.errors.vehicle_no && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.vehicle_no.message}</p>
+                    )}
                   </div>
 
-                  {/* Bill Number */}
-                  <div className="space-y-2">
-                    <Label htmlFor="bill_no" className="text-sm font-medium flex items-center space-x-1">
-                      <Hash className="h-4 w-4" />
-                      <span>Bill Number</span>
-                    </Label>
+                  <div>
+                    <Label htmlFor="bill_no">Bill Number</Label>
                     <Input
                       id="bill_no"
-                      placeholder="BILL001"
-                      value={formData.bill_no}
-                      onChange={(e) => setFormData(prev => ({...prev, bill_no: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
+                      placeholder="Enter bill number"
+                      {...form.register("bill_no")}
                     />
+                    {form.formState.errors.bill_no && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.bill_no.message}</p>
+                    )}
                   </div>
 
-                  {/* Broker Selection */}
-                  <div className="space-y-2">
-                    <Label htmlFor="broker" className="text-sm font-medium flex items-center space-x-1">
-                      <User className="h-4 w-4" />
-                      <span>Broker</span>
-                    </Label>
-                    <Select value={formData.broker_name} onValueChange={(value) => setFormData(prev => ({...prev, broker_name: value}))}>
-                      <SelectTrigger className="border-2 border-gray-300 focus:border-black">
-                        <SelectValue placeholder="Select broker" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {brokerOptions.map(broker => (
-                          <SelectItem key={broker.id} value={broker.name}>
-                            {broker.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Gross Weight */}
-                  <div className="space-y-2">
-                    <Label htmlFor="gross_weight" className="text-sm font-medium flex items-center space-x-1">
-                      <Weight className="h-4 w-4" />
-                      <span>Gross Weight</span>
-                    </Label>
+                  <div>
+                    <Label htmlFor="gross_weight">Gross Weight</Label>
                     <Input
                       id="gross_weight"
-                      placeholder="1700"
-                      type="number"
-                      value={formData.gross_weight}
-                      onChange={(e) => setFormData(prev => ({...prev, gross_weight: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
+                      placeholder="Enter gross weight"
+                      {...form.register("gross_weight")}
                     />
+                    {form.formState.errors.gross_weight && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.gross_weight.message}</p>
+                    )}
                   </div>
 
-                  {/* Tare Weight */}
-                  <div className="space-y-2">
-                    <Label htmlFor="tare_weight" className="text-sm font-medium flex items-center space-x-1">
-                      <Weight className="h-4 w-4" />
-                      <span>Tare Weight</span>
-                    </Label>
+                  <div>
+                    <Label htmlFor="tare_weight">Tare Weight</Label>
                     <Input
                       id="tare_weight"
-                      placeholder="200.00"
-                      type="number"
-                      step="0.01"
-                      value={formData.tare_weight}
-                      onChange={(e) => setFormData(prev => ({...prev, tare_weight: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
+                      placeholder="Enter tare weight"
+                      {...form.register("tare_weight")}
                     />
+                    {form.formState.errors.tare_weight && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.tare_weight.message}</p>
+                    )}
                   </div>
-
-                  {/* Net Weight */}
-                  <div className="space-y-2">
-                    <Label htmlFor="net_weight" className="text-sm font-medium flex items-center space-x-1">
-                      <Weight className="h-4 w-4" />
-                      <span>Net Weight</span>
-                    </Label>
-                    <Input
-                      id="net_weight"
-                      placeholder="1500.00"
-                      type="number"
-                      step="0.01"
-                      value={formData.net_weight}
-                      onChange={(e) => setFormData(prev => ({...prev, net_weight: e.target.value}))}
-                      className="border-2 border-gray-300 focus:border-black"
-                    />
-                  </div>
-
                 </div>
               </CardContent>
             </Card>
 
-            {/* Items Section */}
-            <Card className="border-2 border-gray-200 dark:border-gray-700 hover:border-black dark:hover:border-white transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-black to-gray-800 text-white">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center space-x-2">
+            {/* Items */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
                     <Package className="h-5 w-5" />
                     <span>Items</span>
-                    <Badge variant="outline" className="bg-white text-black border-white">
-                      {formData.items.length} items
-                    </Badge>
-                  </CardTitle>
-                  <Button
-                    onClick={addNewItem}
-                    variant="outline"
-                    size="sm"
-                    className="bg-white text-black border-white hover:bg-gray-100"
-                  >
-                    <Plus className="mr-1 h-4 w-4" />
+                  </div>
+                  <Button type="button" onClick={addNewItem} size="sm">
+                    <Plus className="h-4 w-4 mr-1" />
                     Add Item
                   </Button>
-                </div>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                
-                {formData.items.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No items added
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Add items to this inward entry to get started.
-                    </p>
-                    <Button onClick={addNewItem} className="bg-gradient-to-r from-black to-gray-800 text-white">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add First Item
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {formData.items.map((item, itemIndex) => (
-                      <Card key={item.id} className="border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Package className="h-4 w-4" />
-                              <span className="font-medium">Item {itemIndex + 1}</span>
-                            </div>
-                            <Button
-                              onClick={() => removeItem(item.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+              <CardContent className="space-y-6">
+                {itemFields.map((item, itemIndex) => (
+                  <div key={item.id} className="border rounded-lg p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium">Item {itemIndex + 1}</h4>
+                      {itemFields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeItem(itemIndex)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label>Stock Item</Label>
+                        <Controller
+                          name={`items.${itemIndex}.item_id`}
+                          control={form.control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value?.toString()}
+                              onValueChange={(value) => field.onChange(parseInt(value))}
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          
-                          {/* Item Details Grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            
-                            {/* Stock Item */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Stock Item</Label>
-                              <Select 
-                                value={item.stock_item} 
-                                onValueChange={(value) => updateItem(item.id, 'stock_item', value)}
-                              >
-                                <SelectTrigger className="border-2 border-gray-300 focus:border-black">
-                                  <SelectValue placeholder="Select stock item" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {stockItemOptions.map(stockItem => (
-                                    <SelectItem key={stockItem.id} value={stockItem.name}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select stock item" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {stockItemsLoading ? (
+                                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                ) : (
+                                  stockItems.map((stockItem) => (
+                                    <SelectItem key={stockItem.id} value={stockItem.id.toString()}>
                                       {stockItem.name}
                                     </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
 
-                            {/* Quality */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Quality</Label>
-                              <Select 
-                                value={item.quality} 
-                                onValueChange={(value) => updateItem(item.id, 'quality', value)}
-                              >
-                                <SelectTrigger className="border-2 border-gray-300 focus:border-black">
-                                  <SelectValue placeholder="Select quality" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {qualityOptions.map(quality => (
-                                    <SelectItem key={quality.id} value={quality.name}>
-                                      {quality.name}
+                      <div>
+                        <Label>Quality</Label>
+                        <Controller
+                          name={`items.${itemIndex}.quality_id`}
+                          control={form.control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value?.toString()}
+                              onValueChange={(value) => field.onChange(parseInt(value))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select quality" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {qualityLoading ? (
+                                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                ) : (
+                                  qualityTypes.map((quality) => (
+                                    <SelectItem key={quality.id} value={quality.id.toString()}>
+                                      {quality.name} ({quality.grade})
                                     </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
 
-                            {/* Brand */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Brand</Label>
-                              <Input
-                                placeholder="Binmark"
-                                value={item.brand}
-                                onChange={(e) => updateItem(item.id, 'brand', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Brand</Label>
+                        <Input
+                          placeholder="Enter brand"
+                          {...form.register(`items.${itemIndex}.brand`)}
+                        />
+                      </div>
 
-                            {/* Our Brand */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Our Brand</Label>
-                              <Input
-                                placeholder="WB GOLD"
-                                value={item.our_brand}
-                                onChange={(e) => updateItem(item.id, 'our_brand', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Our Brand</Label>
+                        <Input
+                          placeholder="Enter our brand"
+                          {...form.register(`items.${itemIndex}.our_brand`)}
+                        />
+                      </div>
 
-                            {/* Number of Bags */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Number of Bags</Label>
-                              <Input
-                                placeholder="30"
-                                type="number"
-                                value={item.number_of_bags}
-                                onChange={(e) => updateItem(item.id, 'number_of_bags', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Number of Bags</Label>
+                        <Input
+                          type="number"
+                          placeholder="Enter number of bags"
+                          {...form.register(`items.${itemIndex}.number_of_bags`, { valueAsNumber: true })}
+                        />
+                      </div>
 
-                            {/* Total Weight */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Total Weight</Label>
-                              <Input
-                                placeholder="1500.00"
-                                type="number"
-                                step="0.01"
-                                value={item.total_weight}
-                                onChange={(e) => updateItem(item.id, 'total_weight', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Total Weight</Label>
+                        <Input
+                          placeholder="Enter total weight"
+                          {...form.register(`items.${itemIndex}.total_weight`)}
+                        />
+                      </div>
 
-                            {/* Moisture */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Moisture (%)</Label>
-                              <Input
-                                placeholder="8.5"
-                                type="number"
-                                step="0.1"
-                                value={item.moisture}
-                                onChange={(e) => updateItem(item.id, 'moisture', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Moisture</Label>
+                        <Input
+                          placeholder="Enter moisture"
+                          {...form.register(`items.${itemIndex}.moisture`)}
+                        />
+                      </div>
 
-                            {/* Damaged/Broken Grains */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Damaged/Broken Grains (%)</Label>
-                              <Input
-                                placeholder="1.2"
-                                type="number"
-                                step="0.1"
-                                value={item.damaged_broken_grains}
-                                onChange={(e) => updateItem(item.id, 'damaged_broken_grains', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Damaged/Broken Grains</Label>
+                        <Input
+                          placeholder="Enter damaged/broken grains"
+                          {...form.register(`items.${itemIndex}.damaged_broken_grains`)}
+                        />
+                      </div>
 
-                            {/* Discoloured Grains */}
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Discoloured Grains (%)</Label>
-                              <Input
-                                placeholder="0.8"
-                                type="number"
-                                step="0.1"
-                                value={item.discoloured_grains}
-                                onChange={(e) => updateItem(item.id, 'discoloured_grains', e.target.value)}
-                                className="border-2 border-gray-300 focus:border-black"
-                              />
-                            </div>
+                      <div>
+                        <Label>Discoloured Grains</Label>
+                        <Input
+                          placeholder="Enter discoloured grains"
+                          {...form.register(`items.${itemIndex}.discoloured_grains`)}
+                        />
+                      </div>
+                    </div>
 
+                    <div>
+                      <Label>Remarks</Label>
+                      <Textarea
+                        placeholder="Enter remarks"
+                        {...form.register(`items.${itemIndex}.remarks`)}
+                      />
+                    </div>
+
+                    {/* Jali Details */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-medium">Jali Details</h5>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addJaliDetail(itemIndex)}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Jali
+                        </Button>
+                      </div>
+
+                      {form.watch(`items.${itemIndex}.jali_details`)?.map((jali, jaliIndex) => (
+                        <div key={jaliIndex} className="border rounded p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Jali {jaliIndex + 1}</span>
+                            {form.watch(`items.${itemIndex}.jali_details`)?.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeJaliDetail(itemIndex, jaliIndex)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
 
-                          {/* Remarks */}
-                          <div className="space-y-2 md:col-span-2 lg:col-span-3">
-                            <Label className="text-sm font-medium">Remarks</Label>
-                            <Textarea
-                              placeholder="Full Body - 14%, Half Body - 34%"
-                              value={item.remarks}
-                              onChange={(e) => updateItem(item.id, 'remarks', e.target.value)}
-                              className="border-2 border-gray-300 focus:border-black min-h-[100px]"
-                            />
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div>
+                              <Label>Jali Number</Label>
+                              <Input
+                                placeholder="Enter jali number"
+                                {...form.register(`items.${itemIndex}.jali_details.${jaliIndex}.jali_number`)}
+                              />
+                            </div>
 
-                        </CardContent>
-                      </Card>
-                    ))}
+                            <div>
+                              <Label>Weight Type</Label>
+                              <Controller
+                                name={`items.${itemIndex}.jali_details.${jaliIndex}.weight_type`}
+                                control={form.control}
+                                render={({ field }) => (
+                                  <Select value={field.value} onValueChange={field.onChange}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select weight type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="up">Up</SelectItem>
+                                      <SelectItem value="down">Down</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                              />
+                            </div>
+
+                            <div>
+                              <Label>Weight Value</Label>
+                              <Input
+                                placeholder="Enter weight value"
+                                {...form.register(`items.${itemIndex}.jali_details.${jaliIndex}.weight_value`)}
+                              />
+                            </div>
+
+                            <div>
+                              <Label>Bags Count</Label>
+                              <Input
+                                type="number"
+                                placeholder="Enter bags count"
+                                {...form.register(`items.${itemIndex}.jali_details.${jaliIndex}.bags_count`, { valueAsNumber: true })}
+                              />
+                            </div>
+
+                            <div className="md:col-span-2">
+                              <Label>Remarks</Label>
+                              <Input
+                                placeholder="Enter remarks"
+                                {...form.register(`items.${itemIndex}.jali_details.${jaliIndex}.remarks`)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-
+                ))}
               </CardContent>
             </Card>
 
-          </div>
-        </main>
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-4">
+              <Button type="button" variant="outline" onClick={() => form.reset()}>
+                Reset
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={submitMutation.isPending}
+                className="bg-black hover:bg-gray-800"
+              >
+                {submitMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Entry
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
