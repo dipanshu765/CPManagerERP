@@ -35,22 +35,17 @@ const iconMap = {
 
 const reportSubMenus = [
   { name: "Inward Reports", icon: FileText, path: "/reports/inward" },
-  { name: "Stock Journals", icon: BarChart3, path: "/reports/stock" },
+  { name: "Stock Journals", icon: BarChart3, path: "/reports/stock-journal" },
   { name: "Machine Performance", icon: Activity, path: "/reports/machine" },
   { name: "Hamali Report", icon: TrendingUp, path: "/reports/hamali" },
   { name: "Attendance Report", icon: Clock, path: "/reports/attendance" },
 ];
 
-interface MobileSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
+export default function MobileSidebar({ isOpen, onClose }) {
   const [location, setLocation] = useLocation();
   const [isReportsOpen, setIsReportsOpen] = useState(false);
 
-  const handleNavigation = (path: string, name: string) => {
+  const handleNavigation = (path, name) => {
     if (name === "Log out") {
       setLocation("/login");
       onClose();
@@ -98,7 +93,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         
         <nav className="mt-6">
           {sidebarMenuItems.map((item, index) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap];
+            const Icon = iconMap[item.icon];
             const isActive = location === item.path || 
                             (item.name === "Dashboard" && location === "/dashboard") || 
                             (item.name === "Import Data" && location === "/import") ||
@@ -145,20 +140,23 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                           onClick={() => {
                             if (subItem.path === '/reports/inward') {
                               setLocation('/reports/inward');
+                              onClose();
                             } else if (subItem.path === '/reports/stock-journal') {
                               setLocation('/reports/stock-journal');
+                              onClose();
                             } else {
                               console.log(`Navigate to ${subItem.path}`);
+                              onClose();
                             }
-                            onClose();
                           }}
                           className={cn(
-                            "w-full flex items-center px-6 py-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-all text-left text-sm",
-                            isSubActive && "bg-gray-700 text-white"
+                            "w-full flex items-center px-6 py-2 text-left transition-all",
+                            "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            isSubActive && "bg-gray-700 text-white border-r-4 border-gray-300"
                           )}
                         >
                           <SubIcon className="mr-3 h-4 w-4" />
-                          <span>{subItem.name}</span>
+                          <span className="text-sm">{subItem.name}</span>
                         </button>
                       );
                     })}

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { useIsMobile } from "../hooks/use-mobile";
-import Sidebar from "../components/layout/sidebar";
-import MobileSidebar from "../components/layout/mobile-sidebar";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Separator } from "../components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Sidebar from "@/components/layout/sidebar";
+import MobileSidebar from "@/components/layout/mobile-sidebar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { 
   Menu, 
   Search, 
@@ -25,7 +25,7 @@ import {
   Building2,
   Hash
 } from "lucide-react";
-import Loader from "../components/common/loader";
+import Loader from "@/components/common/loader";
 
 // Static data based on the API response
 const stockJournalData = [

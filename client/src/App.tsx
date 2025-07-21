@@ -4,14 +4,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Login from "@/pages/login.jsx";
-import ForgotPassword from "@/pages/forgot-password";
-import Dashboard from "@/pages/dashboard";
+import ForgotPassword from "@/pages/forgot-password.tsx";
+import Dashboard from "@/pages/dashboard.tsx";
 import ImportData from "@/pages/import-data.jsx";
 import UserList from "@/pages/user-list.jsx";
 import AddInward from "@/pages/add-inward.jsx";
 import InwardReports from "@/pages/inward-reports.jsx";
 import StockJournal from "@/pages/stock-journal.jsx";
-import NotFound from "@/pages/not-found";
+import NotFound from "@/pages/not-found.tsx";
 
 function Router() {
   return (

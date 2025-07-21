@@ -44,7 +44,7 @@ export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const [isReportsOpen, setIsReportsOpen] = useState(false);
 
-  const handleNavigation = (path: string, name: string) => {
+  const handleNavigation = (path, name) => {
     if (name === "Log out") {
       setLocation("/login");
     } else if (path === "/import") {
@@ -72,7 +72,7 @@ export default function Sidebar() {
       
       <nav className="mt-6">
         {sidebarMenuItems.map((item, index) => {
-          const Icon = iconMap[item.icon as keyof typeof iconMap];
+          const Icon = iconMap[item.icon];
           const isActive = location === item.path || 
                           (item.name === "Dashboard" && location === "/dashboard") || 
                           (item.name === "Import Data" && location === "/import") ||
@@ -126,12 +126,13 @@ export default function Sidebar() {
                           }
                         }}
                         className={cn(
-                          "w-full flex items-center px-6 py-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-all text-left text-sm",
-                          isSubActive && "bg-gray-700 text-white"
+                          "w-full flex items-center px-6 py-2 text-left transition-all",
+                          "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          isSubActive && "bg-gray-700 text-white border-r-4 border-gray-300"
                         )}
                       >
                         <SubIcon className="mr-3 h-4 w-4" />
-                        <span>{subItem.name}</span>
+                        <span className="text-sm">{subItem.name}</span>
                       </button>
                     );
                   })}

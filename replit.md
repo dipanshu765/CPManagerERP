@@ -125,7 +125,59 @@ Preferred communication style: Simple, everyday language.
 - **Error Overlay**: Runtime error modal for development
 - **Banner**: Development mode indicator when running outside Replit
 
+## Component Architecture
+
+### Layout Components (JSX)
+- **Sidebar (`client/src/components/layout/sidebar.jsx`)**: Main navigation sidebar with Reports submenu
+- **Mobile Sidebar (`client/src/components/layout/mobile-sidebar.jsx`)**: Responsive mobile version with overlay
+- **Common Loader (`client/src/components/common/loader.jsx`)**: Universal "CP" branded loading component
+
+### Dashboard Components (TSX)
+- **User Info Card**: Current user details and system status display
+- **Inward Entries Metrics**: Summary of inward entries with approval status
+- **Voucher Types Metrics**: Transaction counts by voucher type
+- **Stock Sync Status**: Tally integration and synchronization status
+- **Additional Metrics**: Hamali entries and amount tracking
+- **Transaction Chart**: Chart.js visualization for business analytics
+
+### Page Components (Mixed JSX/TSX)
+- **Login (`login.jsx`)**: Authentication form with email/password
+- **Dashboard (`dashboard.tsx`)**: Main business metrics overview
+- **Add Inward (`add-inward.jsx`)**: Form for creating new inward entries
+- **Import Data (`import-data.jsx`)**: Bulk data import functionality
+- **User List (`user-list.jsx`)**: User management interface
+- **Inward Reports (`inward-reports.jsx`)**: Detailed inward entry reports
+- **Stock Journal (`stock-journal.jsx`)**: Stock transaction reports
+- **Forgot Password (`forgot-password.tsx`)**: Password recovery form
+
+### UI Components (shadcn/ui - TSX)
+Complete shadcn/ui component library including forms, dialogs, cards, buttons, inputs, and navigation components.
+
+### Static Data Management
+- **Mock Data (`client/src/lib/static-data.ts`)**: User data, dashboard metrics, voucher types, and sample business data
+- **Shared Schema (`shared/schema.ts`)**: TypeScript types and Zod validation schemas for database models
+
+### Backend Infrastructure
+- **Express Server (`server/index.ts`)**: Main server with middleware and routing
+- **Routes (`server/routes.ts`)**: API endpoints (currently minimal setup)
+- **Storage (`server/storage.ts`)**: In-memory storage interface with user management
+- **Vite Integration (`server/vite.ts`)**: Development server setup with hot reload
+
+## Security Features
+- **Client/Server Separation**: Frontend and backend properly separated
+- **Type Safety**: Shared TypeScript schemas between frontend and backend
+- **Input Validation**: Zod schemas for form validation and API requests
+- **Session Management**: Express sessions with configurable storage
+
 ## Recent Changes: Latest modifications with dates
+
+### July 21, 2025
+- **Project Migration**: Successfully migrated from Replit Agent to Replit environment
+- **Sidebar Consistency**: Fixed sidebar component inconsistencies across all pages
+- **JSX Conversion**: Converted sidebar components from TSX to JSX format as requested
+- **Import Path Standardization**: Updated all import paths to use consistent @/ aliases
+- **Path Resolution**: Fixed mobile sidebar path mismatch for stock journal reports
+- **Component Documentation**: Comprehensive documentation of all project components
 
 ### July 18, 2025
 - **Common Loader System**: Created universal "CP" branded loader component with theme-matching black/white colors and animations
@@ -134,4 +186,3 @@ Preferred communication style: Simple, everyday language.
 - **Dialog Accessibility**: Fixed missing Dialog descriptions that were causing accessibility warnings
 - **Enhanced UX**: Added realistic loading delays and proper loading text for each screen type
 - **Stock Journal Reports**: Created comprehensive stock journal report screen with static data matching API structure
-- **Project Migration**: Successfully migrated from Replit Agent to Replit environment with all dependencies working
