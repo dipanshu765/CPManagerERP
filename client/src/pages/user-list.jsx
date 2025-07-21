@@ -134,7 +134,7 @@ export default function UserList() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between">
@@ -169,9 +169,10 @@ export default function UserList() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="space-y-6">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

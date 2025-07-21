@@ -34,7 +34,7 @@ import { AuthService } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import Loader from "@/components/common/loader";
 
-const API_BASE_URL = "http://127.0.0.1:8096";
+const API_BASE_URL = "http://192.168.1.118:8095";
 
 // Form validation schema
 const jaliDetailSchema = z.object({
@@ -303,7 +303,7 @@ export default function AddInward() {
       {!isMobile && <Sidebar />}
       <MobileSidebar isOpen={isMobileSidebarOpen} onClose={() => setIsMobileSidebarOpen(false)} />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-white">
           <div className="flex items-center space-x-4">
@@ -329,7 +329,8 @@ export default function AddInward() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="max-w-7xl mx-auto">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -726,7 +727,8 @@ export default function AddInward() {
                 )}
               </Button>
             </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>

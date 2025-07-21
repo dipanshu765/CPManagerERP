@@ -40,7 +40,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between">
@@ -80,24 +80,26 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="space-y-6">
-            {/* User Information Card */}
-            <UserInfoCard user={mockUser} tallyRunning={mockDashboardData.tallyRunning} />
-            
-            {/* Inward Entries Metrics */}
-            <InwardEntriesMetrics data={mockDashboardData} />
-            
-            {/* Voucher Types Metrics */}
-            <VoucherTypesMetrics data={mockDashboardData} />
-            
-            {/* Charts and Stats */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <TransactionChart data={mockDashboardData} />
-              <StockSyncStatus data={mockDashboardData} />
+          <div className="max-w-7xl mx-auto">
+            <div className="space-y-6">
+              {/* User Information Card */}
+              <UserInfoCard user={mockUser} tallyRunning={mockDashboardData.tallyRunning} />
+              
+              {/* Inward Entries Metrics */}
+              <InwardEntriesMetrics data={mockDashboardData} />
+              
+              {/* Voucher Types Metrics */}
+              <VoucherTypesMetrics data={mockDashboardData} />
+              
+              {/* Charts and Stats */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TransactionChart data={mockDashboardData} />
+                <StockSyncStatus data={mockDashboardData} />
+              </div>
+              
+              {/* Additional Metrics */}
+              <AdditionalMetrics data={mockDashboardData} />
             </div>
-            
-            {/* Additional Metrics */}
-            <AdditionalMetrics data={mockDashboardData} />
           </div>
         </main>
       </div>

@@ -331,7 +331,7 @@ export default function StockJournal() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -407,8 +407,9 @@ export default function StockJournal() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900">
-          <div className="space-y-4">
-            {filteredEntries.length === 0 ? (
+          <div className="max-w-7xl mx-auto">
+            <div className="space-y-4">
+              {filteredEntries.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
