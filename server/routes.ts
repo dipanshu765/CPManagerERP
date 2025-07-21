@@ -40,7 +40,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       console.error('Error proxying stock journals request:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(503).json({ 
+        error: 'Backend API server not available',
+        message: 'Please ensure your backend API server is running on http://127.0.0.1:8096',
+        details: 'The stock journal API could not be reached. Please start your backend server.'
+      });
     }
   });
 
@@ -71,7 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       console.error('Error proxying voucher types request:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(503).json({ 
+        error: 'Backend API server not available',
+        message: 'Please ensure your backend API server is running on http://127.0.0.1:8096'
+      });
     }
   });
 
@@ -102,7 +109,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       console.error('Error proxying stock journal details request:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(503).json({ 
+        error: 'Backend API server not available',
+        message: 'Please ensure your backend API server is running on http://127.0.0.1:8096'
+      });
     }
   });
 
@@ -133,7 +143,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       console.error('Error proxying sync to Tally request:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(503).json({ 
+        error: 'Backend API server not available',
+        message: 'Please ensure your backend API server is running on http://127.0.0.1:8096'
+      });
     }
   });
 

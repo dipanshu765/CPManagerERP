@@ -205,24 +205,34 @@ export default function StockJournal() {
   }
 
   if (stockJournalsError) {
+    const isBackendUnavailable = stockJournalsError.message?.includes('503') || stockJournalsError.message?.includes('Backend API server not available');
+    
     return (
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
         <div className="hidden md:block">
           <Sidebar />
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <Card className="p-8 text-center">
+          <Card className="p-8 text-center max-w-md mx-4">
             <CardContent>
               <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Failed to load stock journal reports
+                {isBackendUnavailable ? 'Backend API Server Required' : 'Failed to load stock journal reports'}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {stockJournalsError.message || "Please check your connection and try again"}
+                {isBackendUnavailable ? (
+                  <>
+                    Please start your backend API server on <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">http://127.0.0.1:8096</code> to load stock journal data.
+                    <br /><br />
+                    The frontend is ready and will automatically connect once your API server is running.
+                  </>
+                ) : (
+                  stockJournalsError.message || "Please check your connection and try again"
+                )}
               </p>
               <Button onClick={() => refetchStockJournals()}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
+                {isBackendUnavailable ? 'Check Again' : 'Retry'}
               </Button>
             </CardContent>
           </Card>
