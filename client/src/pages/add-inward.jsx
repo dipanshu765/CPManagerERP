@@ -115,18 +115,33 @@ export default function AddInward() {
   // Fetch parties
   const { data: parties = [], isLoading: partiesLoading } = useQuery({
     queryKey: [`${API_BASE_URL}/api/report/party/`],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `${API_BASE_URL}/api/report/party/`);
+      const data = await response.json();
+      return data.data || [];
+    },
     enabled: !!AuthService.getAccessToken(),
   });
 
   // Fetch brokers
   const { data: brokers = [], isLoading: brokersLoading } = useQuery({
     queryKey: [`${API_BASE_URL}/api/report/broker/`],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `${API_BASE_URL}/api/report/broker/`);
+      const data = await response.json();
+      return data.data || [];
+    },
     enabled: !!AuthService.getAccessToken(),
   });
 
   // Fetch quality types
   const { data: qualityTypes = [], isLoading: qualityLoading } = useQuery({
     queryKey: [`${API_BASE_URL}/api/process/get-quality-types/`],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `${API_BASE_URL}/api/process/get-quality-types/`);
+      const data = await response.json();
+      return data.data || [];
+    },
     enabled: !!AuthService.getAccessToken(),
   });
 
@@ -150,10 +165,11 @@ export default function AddInward() {
   const submitMutation = useMutation({
     mutationFn: async (data) => {
       const response = await apiRequest('POST', `${API_BASE_URL}/api/report/add-inventory/`, data);
-      return response;
+      const responseData = await response.json();
+      return { status: response.status, ...responseData };
     },
-    onSuccess: (response) => {
-      if (response.status === 201) {
+    onSuccess: (data) => {
+      if (data.status === 201) {
         toast({
           title: "Success",
           description: "Inward entry created successfully",
@@ -162,7 +178,7 @@ export default function AddInward() {
       } else {
         toast({
           title: "Error",
-          description: response.message || "Failed to create inward entry",
+          description: data.message || "Failed to create inward entry",
           variant: "destructive",
         });
       }
