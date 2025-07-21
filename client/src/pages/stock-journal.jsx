@@ -490,6 +490,7 @@ export default function StockJournal() {
                 </Card>
               ))
             )}
+            </div>
           </div>
         </main>
       </div>

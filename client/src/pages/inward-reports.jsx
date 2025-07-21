@@ -315,6 +315,7 @@ export default function InwardReports() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </div>
         </main>
       </div>

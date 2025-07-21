@@ -341,6 +341,7 @@ export default function UserList() {
                 </CardContent>
               </Card>
             )}
+            </div>
           </div>
         </main>
       </div>
