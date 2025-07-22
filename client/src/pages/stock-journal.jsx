@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -140,21 +140,38 @@ export default function StockJournal() {
   // Sync function using API
   const syncMutation = useMutation({
     mutationFn: async (transactionId) => {
-      return await apiRequest("POST", `http://127.0.0.1:8096/api/sync-to-tally/`, {
-        transaction_id: transactionId
+      const response = await fetch("http://127.0.0.1:8096/api/process/sync-to-tally/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...AuthService.getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          transaction_id: transactionId
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to sync to Tally: ${response.statusText}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Transaction synced to Tally successfully",
       });
-      refetch(); // Refresh the data
+      refetch(); // Refresh the main data
+      // Close modal and show success
+      setIsDetailModalOpen(false);
+      setSelectedEntry(null);
+      setSelectedTransactionId(null);
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: `Failed to sync transaction: ${error.message}`,
+        description: error.message || "Failed to sync to Tally",
         variant: "destructive",
       });
     }
@@ -206,7 +223,7 @@ export default function StockJournal() {
   };
 
   const getVoucherTypeBadge = (voucherType) => {
-    return <Badge variant="default" className="bg-gradient-to-r from-gray-600 to-gray-700 text-white border-black border-2 hover:from-gray-700 hover:to-gray-800 transition-all duration-300 font-bold">{voucherType}</Badge>;
+    return <Badge variant="secondary" className="text-black dark:text-white font-normal">{voucherType}</Badge>;
   };
 
   const getSyncBadge = (isSynced) => {
