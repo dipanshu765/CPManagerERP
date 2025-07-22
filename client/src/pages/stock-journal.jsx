@@ -47,13 +47,7 @@ const formatDateForApi = (date) => {
   return date ? format(new Date(date), "dd-MM-yyyy") : "";
 };
 
-// Hard-coded voucher types as requested
-const voucherTypes = [
-  { id: 1, name: "Consumption note", value: "consumption_note" },
-  { id: 2, name: "Production note", value: "production_note" },
-  { id: 3, name: "Brand transfer", value: "brand_transfer" },
-  { id: 4, name: "Stock transfer", value: "stock_transfer" }
-];
+// Voucher types will be fetched from API
 
 export default function StockJournal() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -109,26 +103,39 @@ export default function StockJournal() {
     enabled: AuthService.isAuthenticated()
   });
 
-  // Static data for details modal (as requested)
-  const detailData = selectedTransactionId ? {
-    transaction_id: selectedTransactionId,
-    voucher_type_name: selectedEntry?.voucher_type_name || "",
-    voucher_number: selectedEntry?.voucher_number || "",
-    remarks: selectedEntry?.remarks || "",
-    date: selectedEntry?.date || "",
-    effective_date: selectedEntry?.effective_date || "",
-    is_tally_synced: selectedEntry?.is_tally_synced || false,
-    destination_godown: "Main Warehouse",
-    inventory_entries_in: [
-      { item_name: "Sample Item 1", quantity: 100, unit: "KG" },
-      { item_name: "Sample Item 2", quantity: 50, unit: "PCS" }
-    ],
-    inventory_entries_out: [
-      { item_name: "Sample Item 3", quantity: 75, unit: "KG" }
-    ],
-    created_at: selectedEntry?.created_at || "",
-    updated_at: selectedEntry?.updated_at || ""
-  } : null;
+  // Fetch voucher types from API
+  const { data: voucherTypesData } = useQuery({
+    queryKey: ["http://127.0.0.1:8096/api/get-voucher-types/"],
+    queryFn: async () => {
+      const response = await fetch("http://127.0.0.1:8096/api/get-voucher-types/?is_active=true", {
+        headers: AuthService.getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch voucher types: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    },
+    enabled: AuthService.isAuthenticated()
+  });
+
+  // Fetch stock journal details for modal
+  const { data: detailData, isLoading: isDetailLoading } = useQuery({
+    queryKey: ["http://127.0.0.1:8096/api/get-stock-journals-detail/", selectedTransactionId],
+    queryFn: async () => {
+      const response = await fetch(`http://127.0.0.1:8096/api/get-stock-journals-detail/${selectedTransactionId}/`, {
+        headers: AuthService.getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stock journal detail: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    },
+    enabled: AuthService.isAuthenticated() && !!selectedTransactionId
+  });
 
   // Sync function using API
   const syncMutation = useMutation({
@@ -199,12 +206,7 @@ export default function StockJournal() {
   };
 
   const getVoucherTypeBadge = (voucherType) => {
-    if (voucherType.includes("Production")) {
-      return <Badge variant="default" className="bg-gradient-to-r from-green-500 to-green-600 text-white border-black border-2 badge-bounce hover:from-green-600 hover:to-green-700 transition-all duration-300">Production</Badge>;
-    } else if (voucherType.includes("Consumption")) {
-      return <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-black border-2 badge-bounce hover:from-blue-600 hover:to-blue-700 transition-all duration-300">Consumption</Badge>;
-    }
-    return <Badge variant="secondary" className="border-black border-2">{voucherType}</Badge>;
+    return <Badge variant="default" className="bg-gradient-to-r from-gray-600 to-gray-700 text-white border-black border-2 hover:from-gray-700 hover:to-gray-800 transition-all duration-300 font-bold">{voucherType}</Badge>;
   };
 
   const getSyncBadge = (isSynced) => {
@@ -220,6 +222,9 @@ export default function StockJournal() {
       </Badge>
     );
   };
+
+  // Get voucher types
+  const voucherTypes = voucherTypesData?.data || [];
 
   // Show loading state
   if (isLoading || syncMutation.isPending) {
@@ -407,7 +412,7 @@ export default function StockJournal() {
                   <SelectContent>
                     <SelectItem value="all">All Voucher Types</SelectItem>
                     {voucherTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.value}>
+                        <SelectItem key={type.id} value={type.name}>
                           {type.name}
                         </SelectItem>
                       ))}
@@ -478,21 +483,16 @@ export default function StockJournal() {
                           {getSyncBadge(entry.is_tally_synced)}
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div className="flex items-center space-x-2">
                             <Calendar className="h-4 w-4 text-gray-500" />
                             <span className="text-gray-600 dark:text-gray-400">Date:</span>
                             <span className="text-gray-900 dark:text-white">{entry.date}</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Clock className="h-4 w-4 text-gray-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Effective:</span>
-                            <span className="text-gray-900 dark:text-white">{entry.effective_date}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
                             <Building2 className="h-4 w-4 text-gray-500" />
                             <span className="text-gray-600 dark:text-gray-400">Type:</span>
-                            <span className="text-gray-900 dark:text-white">{entry.voucher_type_name}</span>
+                            <span className="text-gray-900 dark:text-white font-bold">{entry.voucher_type_name}</span>
                           </div>
                         </div>
                       </div>
@@ -594,7 +594,11 @@ export default function StockJournal() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedEntry && (
+          {isDetailLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader loadingText="Loading transaction details..." />
+            </div>
+          ) : selectedEntry && detailData?.data ? (
             <div className="space-y-6">
               {/* Header Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white dark:bg-gray-900 rounded-lg border-2 border-black shadow-xl">
@@ -602,17 +606,17 @@ export default function StockJournal() {
                   <div className="flex items-center space-x-2">
                     <Hash className="h-4 w-4 text-gray-500" />
                     <span className="text-sm font-medium text-black dark:text-white">Transaction ID:</span>
-                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.transaction_id}</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{detailData.data.transaction_id}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4 text-gray-500" />
                     <span className="text-sm font-medium text-black dark:text-white">Voucher Number:</span>
-                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.voucher_number}</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{detailData.data.voucher_number}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
                     <span className="text-sm font-medium text-black dark:text-white">Date:</span>
-                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.date}</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{detailData.data.date}</span>
                   </div>
                   {detailData?.data?.remarks && (
                     <div className="flex items-center space-x-2">
@@ -626,7 +630,7 @@ export default function StockJournal() {
                   <div className="flex items-center space-x-2">
                     <Building2 className="h-4 w-4 text-gray-500" />
                     <span className="text-sm font-medium text-black dark:text-white">Voucher Type:</span>
-                    <span className="text-sm text-black dark:text-white font-bold">{selectedEntry.voucher_type_name}</span>
+                    <span className="text-sm text-black dark:text-white font-bold">{detailData.data.voucher_type_name}</span>
                   </div>
                   {detailData?.data?.destination_godown && (
                     <div className="flex items-center space-x-2">
@@ -660,7 +664,7 @@ export default function StockJournal() {
               </div>
 
               {/* Inventory Entries In */}
-              {detailData?.data?.inventory_entries_in && detailData.data.inventory_entries_in.length > 0 && (
+              {detailData.data.inventory_entries_in && detailData.data.inventory_entries_in.length > 0 && (
                 <div style={{animation: 'slide-in-left 0.6s ease-out forwards'}}>
                   <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-green-500 shadow-lg">
                     <ArrowRight className="h-5 w-5 animate-bounce" />
@@ -711,7 +715,7 @@ export default function StockJournal() {
               )}
 
               {/* Inventory Entries Out */}
-              {detailData?.data?.inventory_entries_out && detailData.data.inventory_entries_out.length > 0 && (
+              {detailData.data.inventory_entries_out && detailData.data.inventory_entries_out.length > 0 && (
                 <div style={{animation: 'slide-in-right 0.6s ease-out forwards'}}>
                   <h4 className="flex items-center space-x-2 text-lg font-semibold mb-4 bg-black text-white p-3 rounded-lg border-2 border-red-500 shadow-lg">
                     <ArrowLeft className="h-5 w-5 animate-bounce" />
@@ -764,10 +768,16 @@ export default function StockJournal() {
               <Separator />
 
               {/* Timestamps */}
-              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                <span>Created: {selectedEntry.created_at}</span>
-                <span>Updated: {selectedEntry.updated_at}</span>
-              </div>
+              {(detailData.data.created_at || detailData.data.updated_at) && (
+                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                  {detailData.data.created_at && <span>Created: {detailData.data.created_at}</span>}
+                  {detailData.data.updated_at && <span>Updated: {detailData.data.updated_at}</span>}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <p className="text-gray-500">No details available for this transaction.</p>
             </div>
           )}
         </DialogContent>
