@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -31,10 +32,13 @@ import {
   CalendarIcon,
   RotateCw,
   Filter,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Loader from "@/components/common/loader";
-import { stockJournalData, stockJournalDetailData, stockVoucherTypes } from "@/lib/static-data";
+import { AuthService } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 // Note: Type imports are commented out since this is a JSX file
 // import { StockJournal, VoucherType, StockJournalDetail, StockJournalFilters } from "@shared/schema";
 
@@ -43,30 +47,13 @@ const formatDateForApi = (date) => {
   return date ? format(new Date(date), "dd-MM-yyyy") : "";
 };
 
-// Helper function to filter stock journals based on criteria
-const filterStockJournals = (data, filters) => {
-  return data.filter(entry => {
-    // Date filtering
-    if (filters.from_date) {
-      const entryDate = new Date(entry.date.split('-').reverse().join('-'));
-      const fromDate = new Date(filters.from_date.split('-').reverse().join('-'));
-      if (entryDate < fromDate) return false;
-    }
-    
-    if (filters.to_date) {
-      const entryDate = new Date(entry.date.split('-').reverse().join('-'));
-      const toDate = new Date(filters.to_date.split('-').reverse().join('-'));
-      if (entryDate > toDate) return false;
-    }
-    
-    // Voucher type filtering
-    if (filters.voucher_type && filters.voucher_type !== "all") {
-      if (entry.voucher_type_name !== filters.voucher_type) return false;
-    }
-    
-    return true;
-  });
-};
+// Hard-coded voucher types as requested
+const voucherTypes = [
+  { id: 1, name: "Consumption note", value: "consumption_note" },
+  { id: 2, name: "Production note", value: "production_note" },
+  { id: 3, name: "Brand transfer", value: "brand_transfer" },
+  { id: 4, name: "Stock transfer", value: "stock_transfer" }
+];
 
 export default function StockJournal() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -79,38 +66,94 @@ export default function StockJournal() {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState({ from: false, to: false });
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const isMobile = useIsMobile();
 
-  // Build filters object
-  const filters = {
-    from_date: fromDate ? formatDateForApi(fromDate) : "",
-    to_date: toDate ? formatDateForApi(toDate) : "",
-    voucher_type: voucherTypeFilter || undefined,
+  // Build API query parameters
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage.toString());
+    
+    if (fromDate) {
+      params.append('from_date', formatDateForApi(fromDate));
+    }
+    if (toDate) {
+      params.append('to_date', formatDateForApi(toDate));
+    }
+    if (voucherTypeFilter && voucherTypeFilter !== "all") {
+      params.append('voucher_type', voucherTypeFilter);
+    }
+    if (syncFilter && syncFilter !== "all") {
+      params.append('is_tally_synced', syncFilter === "synced" ? "true" : "false");
+    }
+    
+    return params.toString();
   };
 
-  // Get filtered data from static sources
-  const stockJournalsData = { data: filterStockJournals(stockJournalData, filters) };
-  const voucherTypesData = { data: stockVoucherTypes };
-  const detailData = selectedTransactionId ? stockJournalDetailData[selectedTransactionId] : null;
+  // Fetch stock journals from API
+  const { data: stockJournalsData, isLoading, error, refetch } = useQuery({
+    queryKey: ["http://127.0.0.1:8096/api/get-stock-journals/", currentPage, fromDate, toDate, voucherTypeFilter, syncFilter],
+    queryFn: async () => {
+      const queryParams = buildQueryParams();
+      const url = `http://127.0.0.1:8096/api/get-stock-journals/?${queryParams}`;
+      const response = await fetch(url, {
+        headers: AuthService.getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stock journals: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    },
+    enabled: AuthService.isAuthenticated()
+  });
 
-  // Sync function (simulated for demo)
-  const handleSyncTransaction = async (transactionId) => {
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For demo purposes, just show success message
-    toast({
-      title: "Success",
-      description: "Transaction synced to Tally successfully",
-    });
-    
-    setIsLoading(false);
-  };
+  // Static data for details modal (as requested)
+  const detailData = selectedTransactionId ? {
+    transaction_id: selectedTransactionId,
+    voucher_type_name: selectedEntry?.voucher_type_name || "",
+    voucher_number: selectedEntry?.voucher_number || "",
+    remarks: selectedEntry?.remarks || "",
+    date: selectedEntry?.date || "",
+    effective_date: selectedEntry?.effective_date || "",
+    is_tally_synced: selectedEntry?.is_tally_synced || false,
+    destination_godown: "Main Warehouse",
+    inventory_entries_in: [
+      { item_name: "Sample Item 1", quantity: 100, unit: "KG" },
+      { item_name: "Sample Item 2", quantity: 50, unit: "PCS" }
+    ],
+    inventory_entries_out: [
+      { item_name: "Sample Item 3", quantity: 75, unit: "KG" }
+    ],
+    created_at: selectedEntry?.created_at || "",
+    updated_at: selectedEntry?.updated_at || ""
+  } : null;
 
-  // Filter stock journals based on search, voucher type, and sync status
+  // Sync function using API
+  const syncMutation = useMutation({
+    mutationFn: async (transactionId) => {
+      return await apiRequest("POST", `http://127.0.0.1:8096/api/sync-to-tally/`, {
+        transaction_id: transactionId
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Transaction synced to Tally successfully",
+      });
+      refetch(); // Refresh the data
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to sync transaction: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Filter stock journals based on search only (API handles other filters)
   const stockJournals = stockJournalsData?.data || [];
   const filteredEntries = stockJournals.filter(entry => {
     const matchesSearch = !searchTerm || (
@@ -119,14 +162,18 @@ export default function StockJournal() {
       entry.voucher_type_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
-    const matchesVoucherType = voucherTypeFilter === "all" || entry.voucher_type_name === voucherTypeFilter;
-    
-    const matchesSync = syncFilter === "all" || 
-                       (syncFilter === "synced" && entry.is_tally_synced) ||
-                       (syncFilter === "not_synced" && !entry.is_tally_synced);
-    
-    return matchesSearch && matchesVoucherType && matchesSync;
+    return matchesSearch;
   });
+
+  // Pagination data
+  const pagination = stockJournalsData?.pagination || {
+    current_page: 1,
+    page_size: 50,
+    total_count: 0,
+    total_pages: 1,
+    has_next: false,
+    has_previous: false
+  };
 
   const handleViewDetails = async (entry) => {
     setSelectedTransactionId(entry.transaction_id);
@@ -135,7 +182,7 @@ export default function StockJournal() {
   };
 
   const handleSyncToTally = (transactionId) => {
-    handleSyncTransaction(transactionId);
+    syncMutation.mutate(transactionId);
   };
 
   const handleClearFilters = () => {
@@ -144,6 +191,11 @@ export default function StockJournal() {
     setVoucherTypeFilter("all");
     setSyncFilter("all");
     setSearchTerm("");
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const getVoucherTypeBadge = (voucherType) => {
@@ -169,11 +221,37 @@ export default function StockJournal() {
     );
   };
 
-  // Get voucher types list for dropdown
-  const voucherTypes = voucherTypesData?.data || [];
-
-  if (isLoading) {
+  // Show loading state
+  if (isLoading || syncMutation.isPending) {
     return <Loader loadingText="Loading stock journal reports..." />;
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="max-w-md w-full mx-4">
+            <CardContent className="p-6 text-center">
+              <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Failed to load stock journals
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {error.message}
+              </p>
+              <Button onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -254,7 +332,7 @@ export default function StockJournal() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.reload()}
+                  onClick={() => refetch()}
                   disabled={isLoading}
                 >
                   <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
@@ -329,7 +407,7 @@ export default function StockJournal() {
                   <SelectContent>
                     <SelectItem value="all">All Voucher Types</SelectItem>
                     {voucherTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.name}>
+                        <SelectItem key={type.id} value={type.value}>
                           {type.name}
                         </SelectItem>
                       ))}
@@ -435,6 +513,68 @@ export default function StockJournal() {
                   </CardContent>
                 </Card>
               ))
+            )}
+            
+            {/* Pagination */}
+            {filteredEntries.length > 0 && (
+              <Card className="mt-6">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span>
+                        Showing {filteredEntries.length} of {pagination.total_count} entries
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Page {pagination.current_page} of {pagination.total_pages}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current_page - 1)}
+                        disabled={!pagination.has_previous}
+                        className="flex items-center space-x-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        <span>Previous</span>
+                      </Button>
+                      
+                      <div className="flex items-center space-x-1">
+                        {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                          const pageNum = Math.max(1, pagination.current_page - 2) + i;
+                          if (pageNum > pagination.total_pages) return null;
+                          
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={pageNum === pagination.current_page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(pageNum)}
+                              className="w-8 h-8 p-0"
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.current_page + 1)}
+                        disabled={!pagination.has_next}
+                        className="flex items-center space-x-1"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
             </div>
           </div>
