@@ -9,6 +9,7 @@ import Dashboard from "@/pages/dashboard.tsx";
 import ImportData from "@/pages/import-data.jsx";
 import UserList from "@/pages/user-list.jsx";
 import GodownMasters from "@/pages/godown-masters.jsx";
+import ItemMasters from "@/pages/item-masters.jsx";
 import AddInward from "@/pages/add-inward.jsx";
 import InwardReports from "@/pages/inward-reports.jsx";
 import StockJournal from "@/pages/stock-journal.jsx";
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/import" component={ImportData} />
       <Route path="/users" component={UserList} />
       <Route path="/godown-masters" component={GodownMasters} />
+      <Route path="/item-masters" component={ItemMasters} />
       <Route path="/add-inward" component={AddInward} />
       <Route path="/reports/inward" component={InwardReports} />
       <Route path="/reports/stock-journal" component={StockJournal} />

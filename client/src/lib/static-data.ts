@@ -482,6 +482,7 @@ export const sidebarMenuItems = [
   { name: "Dashboard", icon: "gauge", path: "/dashboard", active: true },
   { name: "User List", icon: "users", path: "/users", active: false },
   { name: "Godown Masters", icon: "warehouse", path: "/godown-masters", active: false },
+  { name: "Item Masters", icon: "package", path: "/item-masters", active: false },
   { name: "Import Data", icon: "upload", path: "/import", active: false },
   { name: "Add Inward", icon: "plus", path: "/add-inward", active: false },
   { name: "Control Settings", icon: "settings", path: "/settings", active: false },

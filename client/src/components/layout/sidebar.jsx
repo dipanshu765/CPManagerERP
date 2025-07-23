@@ -19,13 +19,15 @@ import {
   Activity,
   Clock,
   TrendingUp,
-  Warehouse
+  Warehouse,
+  Package
 } from "lucide-react";
 
 const iconMap = {
   gauge: Gauge,
   users: Users,
   warehouse: Warehouse,
+  package: Package,
   upload: Upload,
   plus: Plus,
   settings: Settings,
@@ -63,6 +65,8 @@ export default function Sidebar() {
       setLocation("/users");
     } else if (path === "/godown-masters") {
       setLocation("/godown-masters");
+    } else if (path === "/item-masters") {
+      setLocation("/item-masters");
     } else if (path === "/dashboard") {
       setLocation("/dashboard");
     } else if (path === "/add-inward") {
@@ -90,6 +94,7 @@ export default function Sidebar() {
                           (item.name === "Import Data" && location === "/import") ||
                           (item.name === "User List" && location === "/users") ||
                           (item.name === "Godown Masters" && location === "/godown-masters") ||
+                          (item.name === "Item Masters" && location === "/item-masters") ||
                           (item.name === "Add Inward" && location === "/add-inward") ||
                           (item.name === "Reports" && location.startsWith("/reports"));
           
