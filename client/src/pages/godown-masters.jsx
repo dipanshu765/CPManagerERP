@@ -34,7 +34,7 @@ export default function GodownMasters() {
     params.append("page", page.toString());
     params.append("limit", ITEMS_PER_PAGE.toString());
 
-    const token = AuthService.getToken();
+    const token = AuthService.getAccessToken();
     if (!token) {
       throw new Error("No authentication token found");
     }
