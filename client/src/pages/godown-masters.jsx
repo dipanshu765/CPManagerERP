@@ -63,13 +63,15 @@ export default function GodownMasters() {
     setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, selectedBranch]);
 
-  if (error) {
-    toast({
-      title: "Error loading godowns",
-      description: error.message,
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading godowns",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const godowns = data?.data || [];
   const totalItems = data?.total || 0;
