@@ -122,4 +122,27 @@ export type StockJournal = z.infer<typeof stockJournalSchema>;
 export type VoucherType = z.infer<typeof voucherTypeSchema>;
 export type StockJournalDetail = z.infer<typeof stockJournalDetailSchema>;
 export type StockJournalFilters = z.infer<typeof stockJournalFiltersSchema>;
+// Godown Masters schema
+export const godownSchema = z.object({
+  id: z.number(),
+  company: z.string(),
+  name: z.string(),
+  branch: z.string(),
+  guid: z.string(),
+  parent: z.string(),
+  is_active: z.boolean(),
+  created_at: z.string(),
+  has_no_space: z.boolean(),
+  has_no_stock: z.boolean(),
+});
+
+export const godownFiltersSchema = z.object({
+  search: z.string().optional(),
+  branch: z.string().optional(),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+});
+
+export type Godown = z.infer<typeof godownSchema>;
+export type GodownFilters = z.infer<typeof godownFiltersSchema>;
 export type SyncRequest = z.infer<typeof syncRequestSchema>;

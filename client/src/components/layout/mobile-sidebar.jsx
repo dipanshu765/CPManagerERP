@@ -19,12 +19,14 @@ import {
   FileText,
   Activity,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Warehouse
 } from "lucide-react";
 
 const iconMap = {
   gauge: Gauge,
   users: Users,
+  warehouse: Warehouse,
   upload: Upload,
   plus: Plus,
   settings: Settings,
@@ -63,6 +65,9 @@ export default function MobileSidebar({ isOpen, onClose }) {
       onClose();
     } else if (path === "/users") {
       setLocation("/users");
+      onClose();
+    } else if (path === "/godown-masters") {
+      setLocation("/godown-masters");
       onClose();
     } else if (path === "/dashboard") {
       setLocation("/dashboard");
@@ -107,6 +112,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
                             (item.name === "Dashboard" && location === "/dashboard") || 
                             (item.name === "Import Data" && location === "/import") ||
                             (item.name === "User List" && location === "/users") ||
+                            (item.name === "Godown Masters" && location === "/godown-masters") ||
                             (item.name === "Add Inward" && location === "/add-inward") ||
                             (item.name === "Reports" && location.startsWith("/reports"));
             
