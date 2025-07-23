@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/lib/auth";
-import { Search, ChevronLeft, ChevronRight, Package, Menu, TrendingUp, Building2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Package, Menu, TrendingUp, Building2, Filter } from "lucide-react";
 import CommonLoader from "@/components/common/loader";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -17,13 +18,14 @@ const ITEMS_PER_PAGE = 50;
 
 export default function ItemMasters() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState("Items");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const fetchItems = async ({ queryKey }) => {
-    const [, { search, page }] = queryKey;
+    const [, { search, type, page }] = queryKey;
     
     const token = AuthService.getAccessToken();
     if (!token) {
@@ -32,7 +34,7 @@ export default function ItemMasters() {
 
     const requestBody = {
       search: search || "",
-      type: "",
+      type: type === "Bardan" ? "bardan" : "",
       stock_group: "",
       godown: ""
     };
@@ -72,7 +74,7 @@ export default function ItemMasters() {
     error,
     refetch
   } = useQuery({
-    queryKey: ['/api/get-stock-items', { search: searchTerm, page: currentPage }],
+    queryKey: ['/api/get-stock-items', { search: searchTerm, type: selectedType, page: currentPage }],
     queryFn: fetchItems,
     enabled: !!AuthService.getAccessToken(),
   });
@@ -142,7 +144,7 @@ export default function ItemMasters() {
           {/* Filters Section */}
           <Card className="mb-6">
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Search Input */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -157,6 +159,25 @@ export default function ItemMasters() {
                       className="pl-10"
                     />
                   </div>
+                </div>
+
+                {/* Type Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Type
+                  </label>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger>
+                      <div className="flex items-center space-x-2">
+                        <Filter className="h-4 w-4 text-gray-500" />
+                        <SelectValue placeholder="Select type" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Items">Items</SelectItem>
+                      <SelectItem value="Bardan">Bardan</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Total Count */}
@@ -193,11 +214,8 @@ export default function ItemMasters() {
                           <TableHead>Item Name</TableHead>
                           <TableHead>Parent</TableHead>
                           <TableHead>Base Unit</TableHead>
-                          <TableHead>Secondary Unit</TableHead>
                           <TableHead>Conversion</TableHead>
                           <TableHead>Closing Balance</TableHead>
-                          <TableHead>Closing Value</TableHead>
-                          <TableHead>Secondary Unit</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -220,11 +238,6 @@ export default function ItemMasters() {
                                 {item.base_units_name}
                               </Badge>
                             </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {item.secondary_unit}
-                              </Badge>
-                            </TableCell>
                             <TableCell className="text-center">
                               {item.conversion}
                             </TableCell>
@@ -233,17 +246,6 @@ export default function ItemMasters() {
                                 <TrendingUp className={`h-4 w-4 ${item.total_closing_balance > 0 ? 'text-green-500' : 'text-gray-400'}`} />
                                 <span>{formatValue(item.total_closing_balance)}</span>
                               </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end space-x-1">
-                                <span>₹</span>
-                                <span>{formatValue(item.total_closing_value)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant={item.is_secondary_unit ? "default" : "secondary"}>
-                                {item.is_secondary_unit ? "Yes" : "No"}
-                              </Badge>
                             </TableCell>
                           </TableRow>
                         ))}
