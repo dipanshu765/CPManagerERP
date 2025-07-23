@@ -8,8 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/lib/auth";
-import { Search, ChevronLeft, ChevronRight, Warehouse, CheckCircle, XCircle } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Warehouse, CheckCircle, XCircle, Menu } from "lucide-react";
 import CommonLoader from "@/components/common/loader";
+import Sidebar from "@/components/layout/sidebar";
+import MobileSidebar from "@/components/layout/mobile-sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 
 const ITEMS_PER_PAGE = 25;
@@ -18,7 +21,9 @@ export default function GodownMasters() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const fetchGodowns = async ({ queryKey }) => {
     const [, { search, branch, page }] = queryKey;
@@ -96,7 +101,29 @@ export default function GodownMasters() {
   }
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {!isMobile && <Sidebar />}
+      <MobileSidebar 
+        isOpen={isMobileSidebarOpen} 
+        onClose={() => setIsMobileSidebarOpen(false)} 
+      />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="bg-white dark:bg-gray-800 shadow-sm border-b p-4 flex items-center justify-between">
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Godown Masters</h1>
+            <div className="w-10" />
+          </div>
+        )}
+
+        <div className="flex-1 p-6 overflow-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Godown Masters</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">Manage and view all godown information</p>
@@ -288,6 +315,8 @@ export default function GodownMasters() {
           )}
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }
