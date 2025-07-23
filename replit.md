@@ -178,6 +178,9 @@ Complete shadcn/ui component library including forms, dialogs, cards, buttons, i
 - **Item Masters Feature**: Added Item Masters menu after Godown Masters with POST API integration `/api/get-stock-items/`
 - **Type Filtering**: Implemented Items/Bardan dropdown filter with proper API request mapping
 - **Column Optimization**: Streamlined table to show only Name, Parent, Base Unit, Conversion, and Closing Balance
+- **Voucher Settings Feature**: Added Voucher Settings menu after Item Masters with GET API integration `/api/get-voucher-types/`
+- **Status Filtering**: Implemented All/Active/Inactive dropdown with is_active query parameter filtering
+- **Default Filtering**: Set Active status as default with automatic is_active=true API parameter
 - **Search & Filtering**: Implemented search by godown name and branch filtering (All, Rayapur, Tarihal)
 - **Responsive Design**: Added mobile sidebar layout with proper responsive design patterns
 - **Pagination System**: Implemented 25 items per page for Godown Masters, 50 items for Item Masters

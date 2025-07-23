@@ -1,0 +1,83 @@
+{
+    "status": 200,
+    "data": [
+        {
+            "id": 95,
+            "name": "Sj Consumption [R]",
+            "is_active": true,
+            "is_batch": false,
+            "add_bardan": true,
+            "in_source": false,
+            "in_destination": true,
+            "source_alias": "Raw Item",
+            "destination_alias": "Process Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.740690"
+        },
+        {
+            "id": 96,
+            "name": "Sj Consumption [T]",
+            "is_active": true,
+            "is_batch": false,
+            "add_bardan": true,
+            "in_source": false,
+            "in_destination": true,
+            "source_alias": "Raw Item",
+            "destination_alias": "Process Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.811233"
+        },
+        {
+            "id": 98,
+            "name": "Sj Production [R]",
+            "is_active": true,
+            "is_batch": true,
+            "add_bardan": true,
+            "in_source": true,
+            "in_destination": false,
+            "source_alias": "Process Item",
+            "destination_alias": "Final Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.852244"
+        },
+        {
+            "id": 99,
+            "name": "Sj Production [T]",
+            "is_active": true,
+            "is_batch": true,
+            "add_bardan": true,
+            "in_source": true,
+            "in_destination": false,
+            "source_alias": "Process Item",
+            "destination_alias": "Final Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.873065"
+        },
+        {
+            "id": 94,
+            "name": "Sj Brand Transfer",
+            "is_active": true,
+            "is_batch": false,
+            "add_bardan": true,
+            "in_source": true,
+            "in_destination": true,
+            "source_alias": "Source Item",
+            "destination_alias": "Destination Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.717743"
+        },
+        {
+            "id": 100,
+            "name": "Sj Stock Transfer",
+            "is_active": true,
+            "is_batch": false,
+            "add_bardan": false,
+            "in_source": false,
+            "in_destination": false,
+            "source_alias": "Source Item",
+            "destination_alias": "Destination Item",
+            "parent": "Stock Journal",
+            "created_at": "2025-07-16T10:51:09.895065"
+        }
+    ]
+}

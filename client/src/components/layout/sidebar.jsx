@@ -67,6 +67,8 @@ export default function Sidebar() {
       setLocation("/godown-masters");
     } else if (path === "/item-masters") {
       setLocation("/item-masters");
+    } else if (path === "/voucher-settings") {
+      setLocation("/voucher-settings");
     } else if (path === "/dashboard") {
       setLocation("/dashboard");
     } else if (path === "/add-inward") {
@@ -95,6 +97,7 @@ export default function Sidebar() {
                           (item.name === "User List" && location === "/users") ||
                           (item.name === "Godown Masters" && location === "/godown-masters") ||
                           (item.name === "Item Masters" && location === "/item-masters") ||
+                          (item.name === "Voucher Settings" && location === "/voucher-settings") ||
                           (item.name === "Add Inward" && location === "/add-inward") ||
                           (item.name === "Reports" && location.startsWith("/reports"));
           
