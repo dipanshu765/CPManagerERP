@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
+
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/lib/auth";
 import { 
@@ -45,7 +45,6 @@ export default function ItemsMapping() {
       ]
     }
   ]);
-  const [itemSearchTerms, setItemSearchTerms] = useState({});
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
@@ -514,38 +513,21 @@ export default function ItemsMapping() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                               <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Select Item</label>
-                                <div className="space-y-2">
-                                  <Input
-                                    placeholder="Search items..."
-                                    value={itemSearchTerms[mappingIndex] || ""}
-                                    onChange={(e) => setItemSearchTerms({
-                                      ...itemSearchTerms,
-                                      [mappingIndex]: e.target.value
-                                    })}
-                                    className="w-full"
-                                  />
-                                  <Select 
-                                    value={mapping.item_id?.toString() || ""} 
-                                    onValueChange={(value) => updateItemSelection(mappingIndex, value)}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Choose an item" />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-[200px]">
-                                      {items
-                                        .filter(item => 
-                                          !itemSearchTerms[mappingIndex] || 
-                                          item.name.toLowerCase().includes(itemSearchTerms[mappingIndex].toLowerCase()) ||
-                                          (item.parent && item.parent.toLowerCase().includes(itemSearchTerms[mappingIndex].toLowerCase()))
-                                        )
-                                        .map((item) => (
-                                          <SelectItem key={item.id} value={item.id.toString()}>
-                                            {item.name} ({item.parent || 'N/A'})
-                                          </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                                <Select 
+                                  value={mapping.item_id?.toString() || ""} 
+                                  onValueChange={(value) => updateItemSelection(mappingIndex, value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Choose an item" />
+                                  </SelectTrigger>
+                                  <SelectContent className="max-h-[200px]">
+                                    {items.map((item) => (
+                                      <SelectItem key={item.id} value={item.id.toString()}>
+                                        {item.name} ({item.parent || 'N/A'})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                               {mapping.item_id && (
                                 <div className="flex items-end">

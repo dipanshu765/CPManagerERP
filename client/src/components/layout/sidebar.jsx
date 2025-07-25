@@ -96,13 +96,13 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 sidebar-gradient text-white flex-shrink-0">
-      <div className="p-6 border-b border-gray-700">
+    <div className="w-64 sidebar-gradient text-white flex-shrink-0 h-screen flex flex-col">
+      <div className="p-6 border-b border-gray-700 flex-shrink-0">
         <h1 className="text-2xl font-bold text-white">CP Manager ERP</h1>
         <p className="text-gray-300 text-sm mt-1">Enterprise Resource Planning</p>
       </div>
       
-      <nav className="mt-6">
+      <nav className="flex-1 overflow-y-auto mt-6">
         {sidebarMenuItems.map((item, index) => {
           const Icon = iconMap[item.icon];
           const isActive = location === item.path || 
