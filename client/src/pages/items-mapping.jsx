@@ -162,10 +162,23 @@ export default function ItemsMapping() {
 
   // Add new item mapping
   const addItemMapping = () => {
+    console.log("Add item mapping clicked, selectedUser:", selectedUser);
+    console.log("Current mappings:", mappings);
+    
+    if (!selectedUser) {
+      toast({
+        title: "Please select a user first",
+        description: "You need to select a user before adding item mappings.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newMapping = {
       item_id: "",
       voucher_mappings: []
     };
+    console.log("Adding new mapping:", newMapping);
     setMappings([...mappings, newMapping]);
   };
 
