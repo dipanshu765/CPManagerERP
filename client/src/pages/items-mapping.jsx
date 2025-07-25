@@ -130,11 +130,6 @@ export default function ItemsMapping() {
     }
   }, [itemsError, vouchersError, toast]);
 
-  // Show loading state for API calls
-  if (itemsLoading || vouchersLoading) {
-    return <Loader text="Loading data for mapping..." />;
-  }
-
   // Add new item mapping
   const addItemMapping = () => {
     const newMapping = {
@@ -308,6 +303,11 @@ export default function ItemsMapping() {
 
     saveMappingsMutation.mutate(submitData);
   };
+
+  // Show loading state for API calls
+  if (itemsLoading || vouchersLoading) {
+    return <Loader text="Loading data for mapping..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
