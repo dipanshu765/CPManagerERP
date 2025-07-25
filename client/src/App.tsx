@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthService } from "@/lib/auth";
 import Login from "@/pages/login.jsx";
 import ForgotPassword from "@/pages/forgot-password.tsx";
 import Dashboard from "@/pages/dashboard.tsx";
@@ -16,21 +17,50 @@ import InwardReports from "@/pages/inward-reports.jsx";
 import StockJournal from "@/pages/stock-journal.jsx";
 import NotFound from "@/pages/not-found.tsx";
 
+// Protected route wrapper
+function ProtectedRoute({ component: Component, ...props }: any) {
+  const isAuthenticated = AuthService.isAuthenticated();
+  
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+  
+  return <Component {...props} />;
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Login} />
       <Route path="/login" component={Login} />
       <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/import" component={ImportData} />
-      <Route path="/users" component={UserList} />
-      <Route path="/godown-masters" component={GodownMasters} />
-      <Route path="/item-masters" component={ItemMasters} />
-      <Route path="/voucher-settings" component={VoucherSettings} />
-      <Route path="/add-inward" component={AddInward} />
-      <Route path="/reports/inward" component={InwardReports} />
-      <Route path="/reports/stock-journal" component={StockJournal} />
+      <Route path="/dashboard">
+        <ProtectedRoute component={Dashboard} />
+      </Route>
+      <Route path="/import">
+        <ProtectedRoute component={ImportData} />
+      </Route>
+      <Route path="/users">
+        <ProtectedRoute component={UserList} />
+      </Route>
+      <Route path="/godown-masters">
+        <ProtectedRoute component={GodownMasters} />
+      </Route>
+      <Route path="/item-masters">
+        <ProtectedRoute component={ItemMasters} />
+      </Route>
+      <Route path="/voucher-settings">
+        <ProtectedRoute component={VoucherSettings} />
+      </Route>
+      <Route path="/add-inward">
+        <ProtectedRoute component={AddInward} />
+      </Route>
+      <Route path="/reports/inward">
+        <ProtectedRoute component={InwardReports} />
+      </Route>
+      <Route path="/reports/stock-journal">
+        <ProtectedRoute component={StockJournal} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

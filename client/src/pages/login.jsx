@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff, Shield, Lock, User, CheckCircle, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/lib/auth";
+import { queryClient } from "@/lib/queryClient";
 import Loader from "../components/common/loader";
 
 export default function Login() {
@@ -51,6 +52,11 @@ export default function Login() {
       });
       
       if (response.status === 200) {
+        // Clear any existing cache to ensure fresh data for the new user
+        queryClient.clear();
+        queryClient.invalidateQueries();
+        queryClient.resetQueries();
+        
         toast({
           title: "Login Successful",
           description: `Welcome back, ${response.data.name}!`,

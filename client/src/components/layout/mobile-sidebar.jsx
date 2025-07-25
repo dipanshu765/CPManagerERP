@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { sidebarMenuItems } from "@/lib/static-data";
 import { AuthService } from "@/lib/auth";
+import { queryClient } from "@/lib/queryClient";
 import { 
   Gauge, 
   Users, 
@@ -54,11 +55,20 @@ export default function MobileSidebar({ isOpen, onClose }) {
     if (name === "Log out") {
       try {
         await AuthService.logout();
+        // Clear all cached queries to ensure fresh data for next login
+        queryClient.clear();
+        // Also invalidate all queries
+        queryClient.invalidateQueries();
+        // Reset query client to completely clean state
+        queryClient.resetQueries();
         setLocation("/login");
         onClose();
       } catch (error) {
         console.error("Logout error:", error);
-        // Still navigate to login even if logout API fails
+        // Still clear cache and navigate to login even if logout API fails
+        queryClient.clear();
+        queryClient.invalidateQueries();
+        queryClient.resetQueries();
         setLocation("/login");
         onClose();
       }

@@ -80,6 +80,9 @@ export class AuthService {
     
     // Clear local storage regardless of API call result
     this.clearAuthData();
+    
+    // Clear React Query cache - we'll call this from the components
+    // that import the queryClient since auth shouldn't import queryClient directly
   }
 
   static setAccessToken(token: string): void {
@@ -106,6 +109,16 @@ export class AuthService {
   static clearAuthData(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(USER_DATA_KEY);
+    
+    // Clear any other localStorage keys that might contain user-specific data
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('cp_manager_') || key.includes('user_') || key.includes('auth_'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
   }
 
   static getAuthHeaders(): Record<string, string> {
