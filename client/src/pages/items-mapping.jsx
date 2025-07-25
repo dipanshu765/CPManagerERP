@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
@@ -27,30 +27,13 @@ import {
 } from "lucide-react";
 import Loader from "@/components/common/loader";
 
-// Static data for demo
+// Static data for demo users (will remain static as per requirement)
 const staticUsers = [
   { id: "USR0001", name: "Mukesh Bafna", role: "Admin" },
   { id: "USR0002", name: "Rajesh Kumar", role: "Manager" },
   { id: "USR0003", name: "Priya Sharma", role: "Operator" },
   { id: "USR0004", name: "Amit Singh", role: "Supervisor" },
   { id: "USR0005", name: "Kavita Patel", role: "Assistant" },
-];
-
-const staticItems = [
-  { id: 9187, name: "Raw Material A", parent: "Raw Materials", base_unit: "KG" },
-  { id: 9186, name: "Raw Material B", parent: "Raw Materials", base_unit: "LTR" },
-  { id: 9179, name: "Finished Product X", parent: "Finished Goods", base_unit: "PCS" },
-  { id: 9178, name: "Finished Product Y", parent: "Finished Goods", base_unit: "PCS" },
-  { id: 9185, name: "Semi Product Z", parent: "Semi Finished", base_unit: "KG" },
-  { id: 9184, name: "Packaging Material", parent: "Packaging", base_unit: "PCS" },
-];
-
-const staticVouchers = [
-  { id: 98, name: "Sj Consumption [R]", type: "Consumption" },
-  { id: 94, name: "Sj Production [R]", type: "Production" },
-  { id: 96, name: "Sj Brand Transfer", type: "Transfer" },
-  { id: 95, name: "Sj Stock Transfer", type: "Stock" },
-  { id: 97, name: "Sj Material Issue", type: "Issue" },
 ];
 
 const mappingTypes = ["SOURCE", "DESTINATION", "BARDAN"];
@@ -62,6 +45,95 @@ export default function ItemsMapping() {
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+
+  // Fetch items from API
+  const fetchItems = async () => {
+    const token = AuthService.getAccessToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch("http://127.0.0.1:8096/api/get-stock-items/", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        search: "",
+        type: "",
+        stock_group: "",
+        godown: ""
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  };
+
+  // Fetch vouchers from API
+  const fetchVouchers = async () => {
+    const token = AuthService.getAccessToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch("http://127.0.0.1:8096/api/get-voucher-types/", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  };
+
+  // React Query for items
+  const { data: items = [], isLoading: itemsLoading, error: itemsError } = useQuery({
+    queryKey: ['/api/get-stock-items-mapping'],
+    queryFn: fetchItems,
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // React Query for vouchers
+  const { data: vouchers = [], isLoading: vouchersLoading, error: vouchersError } = useQuery({
+    queryKey: ['/api/get-voucher-types-mapping'],
+    queryFn: fetchVouchers,
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // Handle API errors
+  useEffect(() => {
+    if (itemsError) {
+      toast({
+        title: "Error loading items",
+        description: itemsError.message,
+        variant: "destructive",
+      });
+    }
+    if (vouchersError) {
+      toast({
+        title: "Error loading vouchers",
+        description: vouchersError.message,
+        variant: "destructive",
+      });
+    }
+  }, [itemsError, vouchersError, toast]);
+
+  // Show loading state for API calls
+  if (itemsLoading || vouchersLoading) {
+    return <Loader text="Loading data for mapping..." />;
+  }
 
   // Add new item mapping
   const addItemMapping = () => {
@@ -346,7 +418,7 @@ export default function ItemsMapping() {
                       <Package className="h-5 w-5" />
                       <span>Items Mapping</span>
                     </CardTitle>
-                    <Button onClick={addItemMapping} disabled={!selectedUser}>
+                    <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Item
                     </Button>
@@ -358,7 +430,7 @@ export default function ItemsMapping() {
                       <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No items mapped yet</h3>
                       <p className="text-gray-600 mb-4">Start by selecting a user and adding item mappings</p>
-                      <Button onClick={addItemMapping} disabled={!selectedUser}>
+                      <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add First Item
                       </Button>
@@ -394,9 +466,9 @@ export default function ItemsMapping() {
                                     <SelectValue placeholder="Choose an item" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {staticItems.map((item) => (
+                                    {items.map((item) => (
                                       <SelectItem key={item.id} value={item.id.toString()}>
-                                        {item.name} ({item.parent})
+                                        {item.name} ({item.parent || 'N/A'})
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -408,7 +480,7 @@ export default function ItemsMapping() {
                                     <div className="text-sm">
                                       <span className="font-medium">Item ID:</span> {mapping.item_id}
                                       <br />
-                                      <span className="font-medium">Unit:</span> {staticItems.find(i => i.id === mapping.item_id)?.base_unit}
+                                      <span className="font-medium">Unit:</span> {items.find(i => i.id === mapping.item_id)?.base_unit}
                                     </div>
                                   </div>
                                 </div>
@@ -457,9 +529,9 @@ export default function ItemsMapping() {
                                           <SelectValue placeholder="Choose a voucher" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {staticVouchers.map((voucher) => (
+                                          {vouchers.map((voucher) => (
                                             <SelectItem key={voucher.id} value={voucher.id.toString()}>
-                                              {voucher.name} ({voucher.type})
+                                              {voucher.voucher_type_name || voucher.name} ({voucher.is_active ? 'Active' : 'Inactive'})
                                             </SelectItem>
                                           ))}
                                         </SelectContent>

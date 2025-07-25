@@ -42,7 +42,7 @@ export default function TransactionChart({ data }: TransactionChartProps) {
         chartRef.current.destroy();
       }
 
-      const ctx = canvasRef.current.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d');
       if (!ctx) return;
 
       // Generate colors for each voucher type
