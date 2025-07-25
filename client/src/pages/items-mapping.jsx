@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/lib/auth";
 import { 
@@ -44,6 +45,7 @@ export default function ItemsMapping() {
       ]
     }
   ]);
+  const [itemSearchTerms, setItemSearchTerms] = useState({});
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
@@ -85,7 +87,7 @@ export default function ItemsMapping() {
       throw new Error("No authentication token found");
     }
 
-    const response = await fetch("http://127.0.0.1:8096/api/get-voucher-types/", {
+    const response = await fetch("http://127.0.0.1:8096/api/get-voucher-types/?is_active=true", {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -512,29 +514,52 @@ export default function ItemsMapping() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                               <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">Select Item</label>
-                                <Select 
-                                  value={mapping.item_id?.toString() || ""} 
-                                  onValueChange={(value) => updateItemSelection(mappingIndex, value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Choose an item" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {items.map((item) => (
-                                      <SelectItem key={item.id} value={item.id.toString()}>
-                                        {item.name} ({item.parent || 'N/A'})
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <div className="space-y-2">
+                                  <Input
+                                    placeholder="Search items..."
+                                    value={itemSearchTerms[mappingIndex] || ""}
+                                    onChange={(e) => setItemSearchTerms({
+                                      ...itemSearchTerms,
+                                      [mappingIndex]: e.target.value
+                                    })}
+                                    className="w-full"
+                                  />
+                                  <Select 
+                                    value={mapping.item_id?.toString() || ""} 
+                                    onValueChange={(value) => updateItemSelection(mappingIndex, value)}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Choose an item" />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[200px]">
+                                      {items
+                                        .filter(item => 
+                                          !itemSearchTerms[mappingIndex] || 
+                                          item.name.toLowerCase().includes(itemSearchTerms[mappingIndex].toLowerCase()) ||
+                                          (item.parent && item.parent.toLowerCase().includes(itemSearchTerms[mappingIndex].toLowerCase()))
+                                        )
+                                        .map((item) => (
+                                          <SelectItem key={item.id} value={item.id.toString()}>
+                                            {item.name} ({item.parent || 'N/A'})
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                               </div>
                               {mapping.item_id && (
                                 <div className="flex items-end">
-                                  <div className="bg-white border border-gray-200 rounded-lg p-3 w-full">
+                                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 w-full">
                                     <div className="text-sm">
-                                      <span className="font-medium">Item ID:</span> {mapping.item_id}
-                                      <br />
-                                      <span className="font-medium">Unit:</span> {items.find(i => i.id === mapping.item_id)?.base_unit}
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <CheckCircle className="h-4 w-4 text-green-600" />
+                                        <span className="font-medium text-green-800">Selected Item</span>
+                                      </div>
+                                      <div className="text-gray-700">
+                                        <strong>{items.find(i => i.id === mapping.item_id)?.name}</strong>
+                                        <br />
+                                        <span className="text-xs">Unit: {items.find(i => i.id === mapping.item_id)?.base_unit || 'N/A'}</span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -585,7 +610,7 @@ export default function ItemsMapping() {
                                         <SelectContent>
                                           {vouchers.map((voucher) => (
                                             <SelectItem key={voucher.id} value={voucher.id.toString()}>
-                                              {voucher.voucher_type_name || voucher.name} ({voucher.is_active ? 'Active' : 'Inactive'})
+                                              {voucher.voucher_type_name || voucher.name}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
