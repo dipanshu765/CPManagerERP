@@ -27,14 +27,7 @@ import {
 } from "lucide-react";
 import Loader from "@/components/common/loader";
 
-// Static data for demo users (will remain static as per requirement)
-const staticUsers = [
-  { id: "USR0001", name: "Mukesh Bafna", role: "Admin" },
-  { id: "USR0002", name: "Rajesh Kumar", role: "Manager" },
-  { id: "USR0003", name: "Priya Sharma", role: "Operator" },
-  { id: "USR0004", name: "Amit Singh", role: "Supervisor" },
-  { id: "USR0005", name: "Kavita Patel", role: "Assistant" },
-];
+// Dynamic user data will be loaded from API
 
 const mappingTypes = ["SOURCE", "DESTINATION", "BARDAN"];
 
@@ -98,6 +91,29 @@ export default function ItemsMapping() {
     return data.data || [];
   };
 
+  // Fetch users from API
+  const fetchUsers = async () => {
+    const token = AuthService.getAccessToken();
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch("http://127.0.0.1:8096/api/get-users/", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  };
+
   // React Query for items
   const { data: items = [], isLoading: itemsLoading, error: itemsError } = useQuery({
     queryKey: ['/api/get-stock-items-mapping'],
@@ -109,6 +125,13 @@ export default function ItemsMapping() {
   const { data: vouchers = [], isLoading: vouchersLoading, error: vouchersError } = useQuery({
     queryKey: ['/api/get-voucher-types-mapping'],
     queryFn: fetchVouchers,
+    enabled: !!AuthService.getAccessToken(),
+  });
+
+  // React Query for users
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
+    queryKey: ['/api/get-users-mapping'],
+    queryFn: fetchUsers,
     enabled: !!AuthService.getAccessToken(),
   });
 
@@ -128,7 +151,14 @@ export default function ItemsMapping() {
         variant: "destructive",
       });
     }
-  }, [itemsError, vouchersError, toast]);
+    if (usersError) {
+      toast({
+        title: "Error loading users",
+        description: usersError.message,
+        variant: "destructive",
+      });
+    }
+  }, [itemsError, vouchersError, usersError, toast]);
 
   // Add new item mapping
   const addItemMapping = () => {
@@ -305,7 +335,7 @@ export default function ItemsMapping() {
   };
 
   // Show loading state for API calls
-  if (itemsLoading || vouchersLoading) {
+  if (itemsLoading || vouchersLoading || usersLoading) {
     return <Loader text="Loading data for mapping..." />;
   }
 
@@ -386,9 +416,9 @@ export default function ItemsMapping() {
                           <SelectValue placeholder="Select a user" />
                         </SelectTrigger>
                         <SelectContent>
-                          {staticUsers.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.name} ({user.role})
+                          {users.map((user) => (
+                            <SelectItem key={user.user_id} value={user.user_id}>
+                              {user.name} ({user.role_name})
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -400,7 +430,7 @@ export default function ItemsMapping() {
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-600" />
                             <span className="text-sm font-medium text-green-800">
-                              Selected: {staticUsers.find(u => u.id === selectedUser)?.name}
+                              Selected: {users.find(u => u.user_id === selectedUser)?.name}
                             </span>
                           </div>
                         </div>
@@ -418,7 +448,7 @@ export default function ItemsMapping() {
                       <Package className="h-5 w-5" />
                       <span>Items Mapping</span>
                     </CardTitle>
-                    <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading}>
+                    <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading || usersLoading}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Item
                     </Button>
@@ -430,7 +460,7 @@ export default function ItemsMapping() {
                       <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No items mapped yet</h3>
                       <p className="text-gray-600 mb-4">Start by selecting a user and adding item mappings</p>
-                      <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading}>
+                      <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading || usersLoading}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add First Item
                       </Button>
