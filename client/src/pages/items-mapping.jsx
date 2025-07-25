@@ -33,7 +33,17 @@ const mappingTypes = ["SOURCE", "DESTINATION", "BARDAN"];
 
 export default function ItemsMapping() {
   const [selectedUser, setSelectedUser] = useState("");
-  const [mappings, setMappings] = useState([]);
+  const [mappings, setMappings] = useState([
+    {
+      item_id: "",
+      voucher_mappings: [
+        {
+          voucher_id: "",
+          types: []
+        }
+      ]
+    }
+  ]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
@@ -165,21 +175,22 @@ export default function ItemsMapping() {
     console.log("Add item mapping clicked, selectedUser:", selectedUser);
     console.log("Current mappings:", mappings);
     
-    if (!selectedUser) {
-      toast({
-        title: "Please select a user first",
-        description: "You need to select a user before adding item mappings.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const newMapping = {
       item_id: "",
-      voucher_mappings: []
+      voucher_mappings: [
+        {
+          voucher_id: "",
+          types: []
+        }
+      ]
     };
     console.log("Adding new mapping:", newMapping);
     setMappings([...mappings, newMapping]);
+    
+    toast({
+      title: "Item mapping added",
+      description: "A new item mapping block has been added.",
+    });
   };
 
   // Remove item mapping
@@ -461,7 +472,7 @@ export default function ItemsMapping() {
                       <Package className="h-5 w-5" />
                       <span>Items Mapping</span>
                     </CardTitle>
-                    <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading || usersLoading}>
+                    <Button onClick={addItemMapping} disabled={itemsLoading || vouchersLoading || usersLoading}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Item
                     </Button>
@@ -473,7 +484,7 @@ export default function ItemsMapping() {
                       <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No items mapped yet</h3>
                       <p className="text-gray-600 mb-4">Start by selecting a user and adding item mappings</p>
-                      <Button onClick={addItemMapping} disabled={!selectedUser || itemsLoading || vouchersLoading || usersLoading}>
+                      <Button onClick={addItemMapping} disabled={itemsLoading || vouchersLoading || usersLoading}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add First Item
                       </Button>
