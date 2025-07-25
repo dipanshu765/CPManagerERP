@@ -22,7 +22,8 @@ import {
   Clock,
   TrendingUp,
   Warehouse,
-  Package
+  Package,
+  Link
 } from "lucide-react";
 
 const iconMap = {
@@ -30,6 +31,7 @@ const iconMap = {
   users: Users,
   warehouse: Warehouse,
   package: Package,
+  link: Link,
   upload: Upload,
   plus: Plus,
   settings: Settings,
@@ -84,6 +86,9 @@ export default function MobileSidebar({ isOpen, onClose }) {
     } else if (path === "/item-masters") {
       setLocation("/item-masters");
       onClose();
+    } else if (path === "/items-mapping") {
+      setLocation("/items-mapping");
+      onClose();
     } else if (path === "/voucher-settings") {
       setLocation("/voucher-settings");
       onClose();
@@ -132,6 +137,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
                             (item.name === "User List" && location === "/users") ||
                             (item.name === "Godown Masters" && location === "/godown-masters") ||
                             (item.name === "Item Masters" && location === "/item-masters") ||
+                            (item.name === "Items Mapping" && location === "/items-mapping") ||
                             (item.name === "Voucher Settings" && location === "/voucher-settings") ||
                             (item.name === "Add Inward" && location === "/add-inward") ||
                             (item.name === "Reports" && location.startsWith("/reports"));

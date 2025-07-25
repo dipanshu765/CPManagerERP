@@ -11,6 +11,7 @@ import ImportData from "@/pages/import-data.jsx";
 import UserList from "@/pages/user-list.jsx";
 import GodownMasters from "@/pages/godown-masters.jsx";
 import ItemMasters from "@/pages/item-masters.jsx";
+import ItemsMapping from "@/pages/items-mapping.jsx";
 import VoucherSettings from "@/pages/voucher-settings.jsx";
 import AddInward from "@/pages/add-inward.jsx";
 import InwardReports from "@/pages/inward-reports.jsx";
@@ -48,6 +49,9 @@ function Router() {
       </Route>
       <Route path="/item-masters">
         <ProtectedRoute component={ItemMasters} />
+      </Route>
+      <Route path="/items-mapping">
+        <ProtectedRoute component={ItemsMapping} />
       </Route>
       <Route path="/voucher-settings">
         <ProtectedRoute component={VoucherSettings} />

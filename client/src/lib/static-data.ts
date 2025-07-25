@@ -483,6 +483,7 @@ export const sidebarMenuItems = [
   { name: "User List", icon: "users", path: "/users", active: false },
   { name: "Godown Masters", icon: "warehouse", path: "/godown-masters", active: false },
   { name: "Item Masters", icon: "package", path: "/item-masters", active: false },
+  { name: "Items Mapping", icon: "link", path: "/items-mapping", active: false },
   { name: "Voucher Settings", icon: "settings", path: "/voucher-settings", active: false },
   { name: "Import Data", icon: "upload", path: "/import", active: false },
   { name: "Add Inward", icon: "plus", path: "/add-inward", active: false },
