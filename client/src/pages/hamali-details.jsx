@@ -109,7 +109,7 @@ export default function HamaliDetails() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-4 sm:px-6">
+        <header className="bg-white shadow-lg border-b-4 border-black px-4 py-6 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               {isMobile && (
@@ -126,15 +126,21 @@ export default function HamaliDetails() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="mr-4 flex items-center text-gray-600 hover:text-gray-900"
+                className="mr-4 flex items-center text-gray-600 hover:text-gray-900 border-2 border-black hover:bg-black hover:text-white transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
-              <FileText className="h-8 w-8 text-gray-600 mr-3" />
+              <FileText className="h-8 w-8 text-black mr-3" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Hamali Details</h1>
-                <p className="text-sm text-gray-500">Date: {date}</p>
+                <h1 className="text-2xl font-bold text-black">Hamali Details</h1>
+              </div>
+            </div>
+            {/* Centered Date Display */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <div className="text-center bg-black text-white px-6 py-3 rounded-lg shadow-lg">
+                <div className="text-3xl font-bold">{date}</div>
+                <div className="text-sm opacity-80">Report Date</div>
               </div>
             </div>
           </div>
@@ -145,74 +151,74 @@ export default function HamaliDetails() {
           <div className="max-w-7xl mx-auto">
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Details</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gray-50">
+                  <CardTitle className="text-sm font-medium text-black">Total Details</CardTitle>
+                  <FileText className="h-4 w-4 text-black" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary_stats.total_details}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-black">{summary_stats.total_details}</div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-green-50">
+                  <CardTitle className="text-sm font-medium text-black">Completed</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary_stats.completed_details}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-green-600">{summary_stats.completed_details}</div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Packets</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-blue-50">
+                  <CardTitle className="text-sm font-medium text-black">Total Packets</CardTitle>
+                  <Package className="h-4 w-4 text-blue-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary_stats.total_packets}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-blue-600">{summary_stats.total_packets}</div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Weight</CardTitle>
-                  <Weight className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-purple-50">
+                  <CardTitle className="text-sm font-medium text-black">Total Weight</CardTitle>
+                  <Weight className="h-4 w-4 text-purple-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary_stats.total_weight}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-purple-600">{summary_stats.total_weight}</div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-yellow-50">
+                  <CardTitle className="text-sm font-medium text-black">Total Amount</CardTitle>
+                  <DollarSign className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹{parseFloat(summary_stats.total_amount).toLocaleString()}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-yellow-600">₹{parseFloat(summary_stats.total_amount).toLocaleString()}</div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Labours</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+              <Card className="border-2 border-black shadow-lg">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-red-50">
+                  <CardTitle className="text-sm font-medium text-black">Total Labours</CardTitle>
+                  <Users className="h-4 w-4 text-red-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary_stats.total_labours}</div>
+                <CardContent className="pt-3">
+                  <div className="text-2xl font-bold text-red-600">{summary_stats.total_labours}</div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Entry Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+            <Card className="border-2 border-black shadow-lg">
+              <CardHeader className="bg-gray-50 border-b-2 border-black">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                  <FileText className="h-6 w-6 text-black" />
                   Entry Details
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 bg-black text-white">
                     {entry_details.length} entries
                   </Badge>
                 </CardTitle>
@@ -220,17 +226,17 @@ export default function HamaliDetails() {
               <CardContent>
                 <div className="space-y-6">
                   {entry_details.map((entry) => (
-                    <Card key={entry.id} className="border-l-4 border-l-blue-500">
+                    <Card key={entry.id} className="border-2 border-black shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-r from-white to-gray-50">
                       <CardContent className="p-6">
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
                           <div className="space-y-3">
                             <div>
                               <span className="text-sm font-medium text-gray-500">Voucher Number</span>
-                              <p className="text-lg font-semibold">{entry.voucher_no}</p>
+                              <p className="text-lg font-bold text-black">{entry.voucher_no}</p>
                             </div>
                             <div>
                               <span className="text-sm font-medium text-gray-500">Hamali Type</span>
-                              <p className="text-sm">{entry.hamali_type.name}</p>
+                              <p className="text-sm font-semibold text-black">{entry.hamali_type.name}</p>
                             </div>
                           </div>
                           
@@ -274,7 +280,7 @@ export default function HamaliDetails() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewDetails(entry.id)}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold"
                           >
                             <Eye className="h-4 w-4" />
                             View Details

@@ -215,12 +215,12 @@ export default function HamaliReports() {
             </div>
 
             {/* Hamali Entries Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+            <Card className="border-2 border-black shadow-lg">
+              <CardHeader className="bg-gray-50 border-b-2 border-black">
+                <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                  <FileText className="h-6 w-6 text-black" />
                   Hamali Daily Entries
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 bg-black text-white">
                     {filteredEntries.length} entries
                   </Badge>
                 </CardTitle>
@@ -247,7 +247,7 @@ export default function HamaliReports() {
                       </thead>
                       <tbody>
                         {filteredEntries.map((entry) => (
-                          <tr key={entry.id} className="border-b hover:bg-gray-50">
+                          <tr key={entry.id} className="border-b-2 border-gray-200 hover:bg-gray-50 hover:border-black transition-colors">
                             <td className="p-4">
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 text-gray-400 mr-2" />
@@ -292,7 +292,7 @@ export default function HamaliReports() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleViewEntries(entry.id)}
-                                className="flex items-center gap-1"
+                                className="flex items-center gap-1 border-2 border-black hover:bg-black hover:text-white transition-colors font-semibold"
                               >
                                 <Eye className="h-4 w-4" />
                                 View Entries
