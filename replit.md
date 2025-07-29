@@ -176,7 +176,7 @@ Complete shadcn/ui component library including forms, dialogs, cards, buttons, i
 - **XML File Upload Support**: Modified file upload to support XML format instead of CSV/Excel files
 - **Multipart Form Data**: Implemented proper multipart/form-data upload with FormData API
 - **Authentication Headers**: Added Bearer token authentication for XML upload API calls
-- **File Validation**: Added XML file type validation and 10MB size limit checking
+- **File Validation**: Added XML file type validation and 70MB size limit checking (updated from 10MB)
 - **Upload Progress UI**: Enhanced UI with loading states, file selection feedback, and upload progress indicators
 - **Error Handling**: Comprehensive error handling with user-friendly toast notifications
 - **Master Data Import APIs**: Implemented individual API calls for master data imports:

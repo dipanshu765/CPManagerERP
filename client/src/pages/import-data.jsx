@@ -179,12 +179,12 @@ export default function ImportData() {
       return;
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    // Validate file size (max 70MB)
+    const maxSize = 70 * 1024 * 1024; // 70MB in bytes
     if (file.size > maxSize) {
       toast({
         title: "File Too Large",
-        description: "File size must be less than 10MB.",
+        description: "File size must be less than 70MB.",
         variant: "destructive",
       });
       return;
@@ -354,7 +354,7 @@ export default function ImportData() {
                         Upload XML file containing stock item master data
                       </p>
                       <p className="text-sm text-gray-500 mb-6">
-                        Supported format: .xml (Max size: 10MB)
+                        Supported format: .xml (Max size: 70MB)
                       </p>
                     </div>
                     <div className="space-y-4">
@@ -435,7 +435,7 @@ export default function ImportData() {
                     <h4 className="font-medium text-gray-900 mb-2">XML File Upload Guidelines</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
                       <li>• Ensure XML file structure is correct</li>
-                      <li>• File size must be less than 10MB</li>
+                      <li>• File size must be less than 70MB</li>
                       <li>• Only XML format is supported</li>
                       <li>• Upload will be processed immediately</li>
                     </ul>
