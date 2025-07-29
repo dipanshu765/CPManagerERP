@@ -157,6 +157,8 @@ export default function Sidebar() {
                             setLocation('/reports/inward');
                           } else if (subItem.path === '/reports/stock-journal') {
                             setLocation('/reports/stock-journal');
+                          } else if (subItem.path === '/reports/hamali') {
+                            setLocation('/reports/hamali');
                           } else {
                             console.log(`Navigate to ${subItem.path}`);
                           }

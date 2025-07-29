@@ -16,6 +16,8 @@ import VoucherSettings from "@/pages/voucher-settings.jsx";
 import AddInward from "@/pages/add-inward.jsx";
 import InwardReports from "@/pages/inward-reports.jsx";
 import StockJournal from "@/pages/stock-journal.jsx";
+import HamaliReports from "@/pages/hamali-reports.jsx";
+import HamaliDetails from "@/pages/hamali-details.jsx";
 import NotFound from "@/pages/not-found.tsx";
 
 // Protected route wrapper
@@ -64,6 +66,12 @@ function Router() {
       </Route>
       <Route path="/reports/stock-journal">
         <ProtectedRoute component={StockJournal} />
+      </Route>
+      <Route path="/reports/hamali">
+        <ProtectedRoute component={HamaliReports} />
+      </Route>
+      <Route path="/reports/hamali/:id">
+        <ProtectedRoute component={HamaliDetails} />
       </Route>
       <Route component={NotFound} />
     </Switch>

@@ -1,0 +1,80 @@
+{
+    "status": 200,
+    "message": "Hamali entry details retrieved successfully",
+    "data": {
+        "date": "29-07-2025",
+        "summary_stats": {
+            "total_details": 6,
+            "completed_details": 6,
+            "total_packets": 330,
+            "total_weight": "315.00 Qtl",
+            "total_amount": "2640.00",
+            "total_labours": 12
+        },
+        "entry_details": [
+            {
+                "id": 50,
+                "work_description": "",
+                "transfer_info": {
+                    "type": "FACTORY",
+                    "from_location": "A Main Location",
+                    "to_location": "A Main Location"
+                },
+                "supervised_by": "Mukesh Bafna",
+                "voucher_no": "MUK022",
+                "hamali_type": {
+                    "id": 10,
+                    "name": "100 KG CHAKI, FILLING & NITT"
+                },
+                "per_unit": {
+                    "id": 9,
+                    "name": "qtl"
+                },
+                "stock_items": [
+                    {
+                        "id": 92,
+                        "item_id": 8159,
+                        "item_name": "Aalvi [25kg] 5 %",
+                        "packets_count": 2,
+                        "weight_per_packet": "0.250",
+                        "total_weight": "0.50 Qtl",
+                        "item_remarks": "From Stock Journal: MUK022",
+                        "created_at": "29-07-2025 13:13:28",
+                        "updated_at": "29-07-2025 13:13:28"
+                    },
+                    {
+                        "id": 93,
+                        "item_id": 8412,
+                        "item_name": "GRAMDALL SUN RE-PROCESS [50KG]",
+                        "packets_count": 2,
+                        "weight_per_packet": "0.500",
+                        "total_weight": "1.00 Qtl",
+                        "item_remarks": "From Stock Journal: MUK022",
+                        "created_at": "29-07-2025 13:13:28",
+                        "updated_at": "29-07-2025 13:13:28"
+                    },
+                    {
+                        "id": 91,
+                        "item_id": 9312,
+                        "item_name": "RAW GRAM BAGS Rayapur",
+                        "packets_count": 51,
+                        "weight_per_packet": "1.000",
+                        "total_weight": "51.00 Qtl",
+                        "item_remarks": "From Stock Journal: MUK022",
+                        "created_at": "29-07-2025 13:13:28",
+                        "updated_at": "29-07-2025 13:13:28"
+                    }
+                ],
+                "total_packets": 55,
+                "total_weight": "52.50 Qtl",
+                "hamali_amount": "440.00",
+                "remarks": "Amounts ",
+                "applied_rate": 8.0,
+                "labour_count": 2,
+                "vehicle_number": "",
+                "driver_name": "",
+                "is_editable": true,
+                "is_completed": true,
+                "status": "Completed",
+                "created_at": "29-07-2025 13:13:28"
+            },
