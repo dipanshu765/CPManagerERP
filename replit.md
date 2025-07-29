@@ -179,6 +179,16 @@ Complete shadcn/ui component library including forms, dialogs, cards, buttons, i
 - **File Validation**: Added XML file type validation and 10MB size limit checking
 - **Upload Progress UI**: Enhanced UI with loading states, file selection feedback, and upload progress indicators
 - **Error Handling**: Comprehensive error handling with user-friendly toast notifications
+- **Master Data Import APIs**: Implemented individual API calls for master data imports:
+  - Import Unit Master: POST `/api/fetch-units/` with Bearer token authentication
+  - Godown Master: POST `/api/fetch-godowns/` with Bearer token authentication
+  - Stock Groups: POST `/api/fetch-stock-group/` with Bearer token authentication
+  - Stock Category: POST `/api/fetch-stock-category/` with Bearer token authentication
+  - Voucher Type Masters: POST `/api/fetch-voucher-types/` with Bearer token authentication
+  - Stock Item Master: Kept static (no API integration for now)
+- **Individual Loading States**: Added specific loading states for each master import with visual feedback
+- **Global Import Overlay**: Created full-screen loading overlay when any master import is in progress
+- **Empty JSON Body**: All master import APIs use empty JSON body as requested
 - **Items Mapping Layout Fix**: Fixed sidebar layout issue where sidebar is now fixed and main content is properly scrollable
 - **JSX Structure Correction**: Resolved JSX syntax errors by properly structuring React fragments and components
 - **Migration Completed**: Successfully completed migration from Replit Agent to Replit environment with all functionality working
