@@ -191,6 +191,15 @@ Complete shadcn/ui component library including forms, dialogs, cards, buttons, i
 - **Empty JSON Body**: All master import APIs use empty JSON body as requested
 - **Items Mapping Layout Fix**: Fixed sidebar layout issue where sidebar is now fixed and main content is properly scrollable
 - **JSX Structure Correction**: Resolved JSX syntax errors by properly structuring React fragments and components
+- **Hamali Reports Feature**: Created comprehensive Hamali reports system with two screens:
+  - Main Hamali Reports: Daily hamali entries listing with API integration (`/api/process/get-hamali/`)
+  - Hamali Details: Individual entry details with simplified layout showing only required fields
+  - Entry Details Popup: Modal popup calling `/api/process/entry-details/{id}/` for detailed entry information
+- **Hamali Reports Customization**: Removed hamali type column from main listing as requested
+- **Simplified Entry Display**: Details screen shows only voucher number, hamali type, supervised by, labour count, total packets, total weight, hamali amount, and applied rate
+- **Popup Implementation**: View Details button opens modal instead of separate screen with comprehensive entry information including stock items, transfer details, and summary statistics
+- **Navigation Integration**: Added Hamali Report to sidebar Reports submenu with proper routing
+- **Authentication Headers**: All Hamali APIs use Bearer token authentication with proper error handling
 - **Migration Completed**: Successfully completed migration from Replit Agent to Replit environment with all functionality working
 
 ### July 25, 2025

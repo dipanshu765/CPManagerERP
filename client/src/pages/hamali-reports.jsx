@@ -242,7 +242,6 @@ export default function HamaliReports() {
                           <th className="text-left p-4 font-medium text-gray-900">Packets</th>
                           <th className="text-left p-4 font-medium text-gray-900">Weight</th>
                           <th className="text-left p-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left p-4 font-medium text-gray-900">Hamali Types</th>
                           <th className="text-center p-4 font-medium text-gray-900">Actions</th>
                         </tr>
                       </thead>
@@ -287,15 +286,6 @@ export default function HamaliReports() {
                                   <><Clock className="h-3 w-3 mr-1" />Pending</>
                                 )}
                               </Badge>
-                            </td>
-                            <td className="p-4">
-                              <div className="max-w-xs">
-                                {entry.hamali_types_used.map((type, index) => (
-                                  <Badge key={index} variant="outline" className="mr-1 mb-1 text-xs">
-                                    {type}
-                                  </Badge>
-                                ))}
-                              </div>
                             </td>
                             <td className="p-4 text-center">
                               <Button

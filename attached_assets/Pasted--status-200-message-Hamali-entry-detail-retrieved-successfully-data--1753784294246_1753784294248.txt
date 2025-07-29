@@ -1,0 +1,66 @@
+{
+    "status": 200,
+    "message": "Hamali entry detail retrieved successfully",
+    "data": {
+        "id": 50,
+        "work_description": "",
+        "transfer_info": {
+            "type": "FACTORY",
+            "type_display": "Factory",
+            "from_location": "A Main Location",
+            "to_location": "A Main Location"
+        },
+        "voucher_no": "MUK022",
+        "hamali_type": {
+            "id": 10,
+            "name": "100 KG CHAKI, FILLING & NITT"
+        },
+        "applied_rate": "8.00",
+        "per_unit": {
+            "id": 9,
+            "name": "qtl"
+        },
+        "total_packets": 55,
+        "total_weight": "52.50 Qtl",
+        "total_weight_display": "52.50 Qtl",
+        "hamali_amount": "440.00",
+        "total_labours_count": 2,
+        "remarks": "Amounts ",
+        "is_completed": true,
+        "status": "Completed",
+        "stock_items": [
+            {
+                "id": 92,
+                "item_name": "Aalvi [25kg] 5 %",
+                "packets_count": 2,
+                "weight_per_packet": "0.2",
+                "total_weight": "0.50 Qtl",
+                "item_remarks": "From Stock Journal: MUK022",
+                "created_at": "29-07-2025 13:13:28",
+                "updated_at": "29-07-2025 13:13:28"
+            },
+            {
+                "id": 93,
+                "item_name": "GRAMDALL SUN RE-PROCESS [50KG]",
+                "packets_count": 2,
+                "weight_per_packet": "0.5",
+                "total_weight": "1.00 Qtl",
+                "item_remarks": "From Stock Journal: MUK022",
+                "created_at": "29-07-2025 13:13:28",
+                "updated_at": "29-07-2025 13:13:28"
+            },
+            {
+                "id": 91,
+                "item_name": "RAW GRAM BAGS Rayapur",
+                "packets_count": 51,
+                "weight_per_packet": "1.0",
+                "total_weight": "51.00 Qtl",
+                "item_remarks": "From Stock Journal: MUK022",
+                "created_at": "29-07-2025 13:13:28",
+                "updated_at": "29-07-2025 13:13:28"
+            }
+        ],
+        "created_at": "29-07-2025 13:13:28",
+        "updated_at": "29-07-2025 13:13:28"
+    }
+}

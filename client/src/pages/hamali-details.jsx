@@ -7,6 +7,7 @@ import MobileSidebar from "../components/layout/mobile-sidebar";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 import { 
   Menu, 
   ArrowLeft,
@@ -32,6 +33,8 @@ const API_BASE_URL = "http://127.0.0.1:8096";
 
 export default function HamaliDetails() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [, params] = useRoute("/reports/hamali/:id");
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
@@ -49,8 +52,24 @@ export default function HamaliDetails() {
     enabled: !!entryId,
   });
 
+  // Fetch entry details for popup
+  const { data: entryDetails, isLoading: isLoadingDetails } = useQuery({
+    queryKey: [`${API_BASE_URL}/api/process/entry-details/${selectedEntryId}/`],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `${API_BASE_URL}/api/process/entry-details/${selectedEntryId}/`);
+      const data = await response.json();
+      return data.data || null;
+    },
+    enabled: !!selectedEntryId,
+  });
+
   const handleBack = () => {
     setLocation('/reports/hamali');
+  };
+
+  const handleViewDetails = (entryDetailId) => {
+    setSelectedEntryId(entryDetailId);
+    setIsDetailModalOpen(true);
   };
 
   if (isLoading) {
@@ -202,123 +221,60 @@ export default function HamaliDetails() {
                 <div className="space-y-6">
                   {entry_details.map((entry) => (
                     <Card key={entry.id} className="border-l-4 border-l-blue-500">
-                      <CardHeader>
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                          <div className="flex items-center gap-4">
+                      <CardContent className="p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+                          <div className="space-y-3">
                             <div>
-                              <h3 className="text-lg font-semibold">Voucher: {entry.voucher_no}</h3>
-                              <p className="text-sm text-gray-600">{entry.hamali_type.name}</p>
+                              <span className="text-sm font-medium text-gray-500">Voucher Number</span>
+                              <p className="text-lg font-semibold">{entry.voucher_no}</p>
                             </div>
-                            <Badge variant={entry.is_completed ? "default" : "secondary"}>
-                              {entry.is_completed ? (
-                                <><CheckCircle className="h-3 w-3 mr-1" />{entry.status}</>
-                              ) : (
-                                <><Clock className="h-3 w-3 mr-1" />Pending</>
-                              )}
-                            </Badge>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Hamali Type</span>
+                              <p className="text-sm">{entry.hamali_type.name}</p>
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="outline">
-                              <Package className="h-3 w-3 mr-1" />
-                              {entry.total_packets} packets
-                            </Badge>
-                            <Badge variant="outline">
-                              <Weight className="h-3 w-3 mr-1" />
-                              {entry.total_weight}
-                            </Badge>
-                            <Badge variant="outline">
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              ₹{parseFloat(entry.hamali_amount).toLocaleString()}
-                            </Badge>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Supervised By</span>
+                              <p className="text-sm">{entry.supervised_by}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Labour Count</span>
+                              <p className="text-sm font-semibold">{entry.labour_count}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Total Packets</span>
+                              <p className="text-sm font-semibold">{entry.total_packets}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Total Weight</span>
+                              <p className="text-sm font-semibold">{entry.total_weight}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Hamali Amount</span>
+                              <p className="text-lg font-semibold text-green-600">₹{parseFloat(entry.hamali_amount).toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Applied Rate</span>
+                              <p className="text-sm font-semibold">₹{entry.applied_rate} per {entry.per_unit.name}</p>
+                            </div>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm font-medium">Supervised by:</span>
-                              <span className="text-sm">{entry.supervised_by}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm font-medium">Transfer:</span>
-                              <span className="text-sm">{entry.transfer_info.type} - {entry.transfer_info.from_location} → {entry.transfer_info.to_location}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm font-medium">Labour Count:</span>
-                              <span className="text-sm">{entry.labour_count}</span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <Weight className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm font-medium">Applied Rate:</span>
-                              <span className="text-sm">₹{entry.applied_rate} per {entry.per_unit.name}</span>
-                            </div>
-                            {entry.vehicle_number && (
-                              <div className="flex items-center gap-2">
-                                <Truck className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm font-medium">Vehicle:</span>
-                                <span className="text-sm">{entry.vehicle_number}</span>
-                              </div>
-                            )}
-                            {entry.driver_name && (
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm font-medium">Driver:</span>
-                                <span className="text-sm">{entry.driver_name}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Stock Items */}
-                        <div className="border-t pt-4">
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">Stock Items</h4>
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                              <thead>
-                                <tr className="border-b">
-                                  <th className="text-left p-2 font-medium text-gray-700">Item Name</th>
-                                  <th className="text-center p-2 font-medium text-gray-700">Packets</th>
-                                  <th className="text-center p-2 font-medium text-gray-700">Weight/Packet</th>
-                                  <th className="text-center p-2 font-medium text-gray-700">Total Weight</th>
-                                  <th className="text-left p-2 font-medium text-gray-700">Remarks</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {entry.stock_items.map((item) => (
-                                  <tr key={item.id} className="border-b">
-                                    <td className="p-2 font-medium">{item.item_name}</td>
-                                    <td className="p-2 text-center">{item.packets_count}</td>
-                                    <td className="p-2 text-center">{item.weight_per_packet}</td>
-                                    <td className="p-2 text-center font-medium">{item.total_weight}</td>
-                                    <td className="p-2 text-gray-600">{item.item_remarks}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        {/* Remarks */}
-                        {entry.remarks && (
-                          <div className="border-t pt-4 mt-4">
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Remarks</h4>
-                            <p className="text-sm text-gray-600">{entry.remarks}</p>
-                          </div>
-                        )}
 
                         {/* View Details Button */}
-                        <div className="border-t pt-4 mt-4">
+                        <div className="mt-6 pt-4 border-t">
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled
-                            className="flex items-center gap-1 opacity-60 cursor-not-allowed"
+                            onClick={() => handleViewDetails(entry.id)}
+                            className="flex items-center gap-1"
                           >
                             <Eye className="h-4 w-4" />
                             View Details
@@ -333,6 +289,149 @@ export default function HamaliDetails() {
           </div>
         </main>
       </div>
+
+      {/* Entry Details Modal */}
+      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Hamali Entry Details</DialogTitle>
+            <DialogDescription>
+              Detailed information for entry ID: {selectedEntryId}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isLoadingDetails ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader text="Loading entry details..." />
+            </div>
+          ) : entryDetails ? (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Voucher Number</span>
+                  <p className="text-lg font-semibold">{entryDetails.voucher_no}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Status</span>
+                  <Badge variant={entryDetails.is_completed ? "default" : "secondary"}>
+                    {entryDetails.status}
+                  </Badge>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Hamali Type</span>
+                  <p className="text-sm">{entryDetails.hamali_type.name}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Applied Rate</span>
+                  <p className="text-sm">₹{entryDetails.applied_rate} per {entryDetails.per_unit.name}</p>
+                </div>
+              </div>
+
+              {/* Transfer Information */}
+              <div className="border-t pt-4">
+                <h4 className="text-lg font-semibold mb-3">Transfer Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Type</span>
+                    <p className="text-sm">{entryDetails.transfer_info.type_display}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">From Location</span>
+                    <p className="text-sm">{entryDetails.transfer_info.from_location}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">To Location</span>
+                    <p className="text-sm">{entryDetails.transfer_info.to_location}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="border-t pt-4">
+                <h4 className="text-lg font-semibold mb-3">Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-gray-50 rounded">
+                    <Package className="h-6 w-6 mx-auto mb-1 text-blue-600" />
+                    <p className="text-xl font-bold">{entryDetails.total_packets}</p>
+                    <p className="text-sm text-gray-600">Total Packets</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded">
+                    <Weight className="h-6 w-6 mx-auto mb-1 text-green-600" />
+                    <p className="text-xl font-bold">{entryDetails.total_weight_display}</p>
+                    <p className="text-sm text-gray-600">Total Weight</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded">
+                    <DollarSign className="h-6 w-6 mx-auto mb-1 text-yellow-600" />
+                    <p className="text-xl font-bold">₹{parseFloat(entryDetails.hamali_amount).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Hamali Amount</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded">
+                    <Users className="h-6 w-6 mx-auto mb-1 text-purple-600" />
+                    <p className="text-xl font-bold">{entryDetails.total_labours_count}</p>
+                    <p className="text-sm text-gray-600">Labour Count</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stock Items */}
+              <div className="border-t pt-4">
+                <h4 className="text-lg font-semibold mb-3">Stock Items</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border rounded-lg">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-left p-3 font-medium text-gray-700">Item Name</th>
+                        <th className="text-center p-3 font-medium text-gray-700">Packets</th>
+                        <th className="text-center p-3 font-medium text-gray-700">Weight/Packet</th>
+                        <th className="text-center p-3 font-medium text-gray-700">Total Weight</th>
+                        <th className="text-left p-3 font-medium text-gray-700">Remarks</th>
+                        <th className="text-center p-3 font-medium text-gray-700">Created</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entryDetails.stock_items.map((item) => (
+                        <tr key={item.id} className="border-t hover:bg-gray-50">
+                          <td className="p-3 font-medium">{item.item_name}</td>
+                          <td className="p-3 text-center">{item.packets_count}</td>
+                          <td className="p-3 text-center">{item.weight_per_packet}</td>
+                          <td className="p-3 text-center font-medium">{item.total_weight}</td>
+                          <td className="p-3 text-gray-600">{item.item_remarks}</td>
+                          <td className="p-3 text-center text-xs text-gray-500">{item.created_at}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Remarks */}
+              {entryDetails.remarks && (
+                <div className="border-t pt-4">
+                  <h4 className="text-lg font-semibold mb-2">Remarks</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{entryDetails.remarks}</p>
+                </div>
+              )}
+
+              {/* Work Description */}
+              {entryDetails.work_description && (
+                <div className="border-t pt-4">
+                  <h4 className="text-lg font-semibold mb-2">Work Description</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{entryDetails.work_description}</p>
+                </div>
+              )}
+
+              <div className="border-t pt-4 text-xs text-gray-500">
+                <p>Created: {entryDetails.created_at} | Updated: {entryDetails.updated_at}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Entry details not found</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
