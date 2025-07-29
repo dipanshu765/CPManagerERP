@@ -4,13 +4,16 @@ import Sidebar from "@/components/layout/sidebar";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Menu, Database, Building2, Layers, Tags, Package, FileType, Upload } from "lucide-react";
+import { Menu, Database, Building2, Layers, Tags, Package, FileType, Upload, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/lib/auth";
 import Loader from "@/components/common/loader";
 
 export default function ImportData() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -87,14 +90,91 @@ export default function ImportData() {
     console.log(`Importing: ${action}`);
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
+    if (!file) return;
+
+    // Validate file type (XML)
+    const allowedTypes = ['.xml', 'text/xml', 'application/xml'];
+    const fileExtension = file.name.toLowerCase().split('.').pop();
+    const isValidType = fileExtension === 'xml' || allowedTypes.includes(file.type);
+
+    if (!isValidType) {
       toast({
-        title: "File Upload",
-        description: `Selected file: ${file.name}`,
+        title: "Invalid File Type",
+        description: "Please select a valid XML file.",
+        variant: "destructive",
       });
-      console.log("File selected:", file.name);
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      toast({
+        title: "File Too Large",
+        description: "File size must be less than 10MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setIsUploading(true);
+
+    try {
+      // Get authentication token
+      const token = AuthService.getAccessToken();
+      if (!token) {
+        throw new Error("No authentication token found. Please login again.");
+      }
+
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload file to API
+      const response = await fetch('http://127.0.0.1:8096/api/upload-xml/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Upload failed with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      toast({
+        title: "Upload Successful",
+        description: `File "${file.name}" uploaded successfully. ${result.message || ''}`,
+        variant: "default",
+      });
+
+      console.log("Upload successful:", result);
+      
+      // Reset file input
+      event.target.value = '';
+      setSelectedFile(null);
+
+    } catch (error) {
+      console.error("Upload error:", error);
+      
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload file. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Reset file input on error
+      event.target.value = '';
+      setSelectedFile(null);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -186,29 +266,65 @@ export default function ImportData() {
                         Upload Stock Item Master
                       </h3>
                       <p className="text-gray-600 mb-4">
-                        Upload Excel or CSV file containing stock item master data
+                        Upload XML file containing stock item master data
                       </p>
                       <p className="text-sm text-gray-500 mb-6">
-                        Supported formats: .xlsx, .xls, .csv (Max size: 10MB)
+                        Supported format: .xml (Max size: 10MB)
                       </p>
                     </div>
                     <div className="space-y-4">
+                      {selectedFile && !isUploading && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-sm font-medium text-green-800">
+                              File selected: {selectedFile.name}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {isUploading && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                            <span className="text-sm font-medium text-blue-800">
+                              Uploading {selectedFile?.name}...
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
                       <label
                         htmlFor="file-upload"
-                        className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-black to-gray-600 hover:from-gray-800 hover:to-gray-700 cursor-pointer transition-all duration-300 transform hover:scale-105"
+                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white transition-all duration-300 transform hover:scale-105 ${
+                          isUploading 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-black to-gray-600 hover:from-gray-800 hover:to-gray-700 cursor-pointer'
+                        }`}
                       >
-                        <Upload className="mr-2 h-5 w-5" />
-                        Choose File
+                        {isUploading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-5 w-5" />
+                            Choose XML File
+                          </>
+                        )}
                       </label>
                       <input
                         id="file-upload"
                         type="file"
-                        accept=".xlsx,.xls,.csv"
+                        accept=".xml,text/xml,application/xml"
                         onChange={handleFileUpload}
+                        disabled={isUploading}
                         className="hidden"
                       />
                       <p className="text-xs text-gray-500">
-                        Or drag and drop your file here
+                        Or drag and drop your XML file here
                       </p>
                     </div>
                   </div>
@@ -231,12 +347,12 @@ export default function ImportData() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">File Upload Guidelines</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">XML File Upload Guidelines</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• Use the provided template for best results</li>
-                      <li>• Ensure all required fields are filled</li>
-                      <li>• Check data format before uploading</li>
-                      <li>• Large files may take longer to process</li>
+                      <li>• Ensure XML file structure is correct</li>
+                      <li>• File size must be less than 10MB</li>
+                      <li>• Only XML format is supported</li>
+                      <li>• Upload will be processed immediately</li>
                     </ul>
                   </div>
                 </div>
