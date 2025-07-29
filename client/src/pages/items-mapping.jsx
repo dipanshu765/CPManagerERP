@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Separator } from "@/components/ui/separator";
 
 import { useToast } from "@/hooks/use-toast";
@@ -365,47 +365,45 @@ export default function ItemsMapping() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar for desktop */}
-        {!isMobile && <Sidebar />}
-
-        {/* Mobile sidebar */}
-        <MobileSidebar 
-          isOpen={isMobileSidebarOpen} 
-          onClose={() => setIsMobileSidebarOpen(false)} 
-        />
+    <>
+      <div className="h-screen bg-gray-50 flex overflow-hidden">
+        {/* Sidebar for desktop - Fixed */}
+        {!isMobile && (
+          <div className="flex-shrink-0">
+            <Sidebar />
+          </div>
+        )}
 
         {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsMobileSidebarOpen(true)}
-                    className="lg:hidden"
-                  >
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                )}
-                <div className="flex items-center space-x-3">
-                  <Link className="h-8 w-8 text-gray-600" />
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Items Mapping</h1>
-                    <p className="text-sm text-gray-600">Map stock items with users based on vouchers and types</p>
-                  </div>
+        {/* Header - Fixed */}
+        <header className="flex-shrink-0 bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="lg:hidden"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              )}
+              <div className="flex items-center space-x-3">
+                <Link className="h-8 w-8 text-gray-600" />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Items Mapping</h1>
+                  <p className="text-sm text-gray-600">Map stock items with users based on vouchers and types</p>
                 </div>
               </div>
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* Content */}
-          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+        {/* Content - Scrollable */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
               {/* Instructions Card */}
               <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="p-6">
@@ -491,8 +489,7 @@ export default function ItemsMapping() {
                       </Button>
                     </div>
                   ) : (
-                    <ScrollArea className="h-[600px]">
-                      <div className="space-y-6">
+                    <div className="space-y-6">
                         {mappings.map((mapping, mappingIndex) => (
                           <div key={mappingIndex} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                             {/* Item Selection */}
@@ -644,7 +641,6 @@ export default function ItemsMapping() {
                           </div>
                         ))}
                       </div>
-                    </ScrollArea>
                   )}
                 </CardContent>
               </Card>
@@ -685,9 +681,12 @@ export default function ItemsMapping() {
           </main>
         </div>
       </div>
-
-      {/* Loader */}
-      <Loader isLoading={isLoading} text="Processing mappings" />
-    </div>
+      
+      {/* Mobile sidebar */}
+      <MobileSidebar 
+        isOpen={isMobileSidebarOpen} 
+        onClose={() => setIsMobileSidebarOpen(false)} 
+      />
+    </>
   );
 }
